@@ -51,12 +51,12 @@ const ItemDetails = () => {
       <div className='px-4 border-2 border-gray-300 w-full p-2 flex flex-col items-center justify-center'>
 
         {/* main image */}
-        <div className='h-full w-[400px] relative item-card'>
+        <div className='h-full lg:w-[400px] relative item-card'>
           {loading ? (
-            <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '8px' }} className='!h-full' />
+            <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '8px' }} height={300} width={300} />
           ) : (
             <>
-              <div className='absolute h-full w-[400px] bg-[#00000068] cursor-pointer gap-2 rounded opacity-0 item-overlay flex items-center justify-center text-white'>
+              <div className='absolute h-full lg:w-[400px] w-full bg-[#00000068] cursor-pointer gap-2 rounded opacity-0 item-overlay flex items-center justify-center text-white'>
                 <RemoveRedEyeOutlinedIcon className='!text-white' />
                 <p>Preview</p>
               </div>
