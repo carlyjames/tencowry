@@ -30,7 +30,9 @@ const PopularProducts = () => {
         </div>
 
         <div className='flex items-center text-[#ff5c40] font-medium'>
-          <a href="/">View all <ArrowRightIcon className='text-black' /> </a>
+          <Link to={'/popular-products'}>
+            <a href="/">View all <ArrowRightIcon className='text-black' /> </a>
+          </Link>
         </div>
       </div>
 
