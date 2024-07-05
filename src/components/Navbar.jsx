@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState } from 'react';
 import NavItems from './Data/NavItems';
-
+import RegisterSeller from './RegisterSeller';
 // images
 import logo from '../Assets/images/logo_2_main.png'
 
@@ -33,6 +33,11 @@ const Navbar = (props) => {
   const { window } = props;
   const [open, setOpen] = useState(true)
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [seller, setSeller] = useState(false);
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleDrawerToggle = () => {
     setMobileOpen((prevState) => !prevState);
@@ -40,8 +45,11 @@ const Navbar = (props) => {
 
   const toggleDropdown = () => {
     setOpen((prevState) => !prevState);
-
   };
+
+  const toggleSeller = () => {
+    setSeller((prevState) => !prevState);
+  }
 
   const drawer = (
     <div className='h-[100vh] flex flex-col items-start justify-center gap'>
@@ -51,10 +59,10 @@ const Navbar = (props) => {
       <Box onClick={handleDrawerToggle} sx={{ display: 'flex', alignItems: 'center', justifyItems: 'center', width: '100%' }}>
         <List sx={{ width: '100%' }}>
           {NavItems.map((item) => (
-            <ListItem key={item.id}  disablePadding>
-              <ListItemButton className='drawer-item' sx={{ textAlign: 'center', justifyItems: 'center', display: 'flex', marginTop: '6px', alignItems :'center' }}>
+            <ListItem key={item.id} disablePadding>
+              <ListItemButton className='drawer-item' sx={{ textAlign: 'center', justifyItems: 'center', display: 'flex', marginTop: '6px', alignItems: 'center' }}>
                 <Link className='text-center flex items-center justify-center w-full' to={item.link}>
-                {item.name}
+                  {item.name}
                 </Link>
               </ListItemButton>
             </ListItem>
@@ -63,6 +71,37 @@ const Navbar = (props) => {
       </Box>
     </div>
   );
+
+  const handleInputChange = (e) => {
+    setQuery(e.target.value);
+  };
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('https://tencowry-api-staging.onrender.com/api/v1/ecommerce/product/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': 'd2db2862682ea1b7618cca9b3180e04e'
+        },
+        body: JSON.stringify({ query })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch data');
+      }
+      const data = await response.json();
+      setResults(data.data || []);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const container = window !== undefined ? () => window().document.body : undefined;
 
@@ -74,13 +113,13 @@ const Navbar = (props) => {
         <div className='flex items-center gap-2 '>
           <p className='font-extra'>Welcome to TenCowry!</p>
           <div className='flex items-center gap-1'>
-            <a href="" className='text-[#ff5c40]'>Login</a>
+            <Link className='text-[#ff5c40]' to='/login' >Login </Link>
             <span className=''>or</span>
-            <a href="" className='text-[#ff5c40]'>Register</a>
+            <Link className='text-[#ff5c40]' to='/register' >Register </Link>
           </div>
         </div>
         <div className='flex items-center gap-3'>
-          <Button className='text-small mui-btn ' sx={{ background: '#ff5c40', color: 'white', display: { xs: 'none', sm: 'flex' } }}>BECOME A SELLER</Button>
+          <Button className='text-small mui-btn' onClick={toggleSeller} sx={{ background: '#ff5c40', color: 'white', display: { xs: 'none', sm: 'flex' } }}>BECOME A SELLER</Button>
           <a className='lg:text-lg font-light' href="/">₦ Naira</a>
           <a className='text-lg font-light lg:block hidden' href="/">English</a>
         </div>
@@ -95,11 +134,20 @@ const Navbar = (props) => {
           </Link>
         </div>
         {/* search bar */}
-        <div className='lg:flex items-center justify-center hidden'>
-          <input className='border-0 p-3 w-full bg-white text-black rounded-l-lg  ' type="text" placeholder='enter full word e.g women not wom' />
-          <IconButton sx={{ background: '#ff5c40', borderRadius: '0 8px 8px 0', padding: '10px' }}>
+        <form onSubmit={handleSearch} className='lg:flex items-center justify-center hidden'>
+          <input value={query} onChange={handleInputChange} className='border-0 p-3 w-full bg-white text-black rounded-l-lg  ' type="text" placeholder='enter full word e.g women not wom' />
+          <IconButton type='submit' sx={{ background: '#ff5c40', borderRadius: '0 8px 8px 0', padding: '10px' }}>
             <Search sx={{ color: 'white' }} />
           </IconButton>
+          {loading && <p>Loading...</p>}
+          {error && <p>Error: {error}</p>}
+        </form>
+        <div>
+          {results.map(result => (
+            <div key={result.id}>
+              <h2>{result.product_name}</h2>
+            </div>
+          ))}
         </div>
         {/* cart */}
         <div className=' flex items-center justify-end'>
@@ -127,15 +175,15 @@ const Navbar = (props) => {
               </div>
               {/* dropdown */}
               <div className="dropdown relative">
-                <List className={ open ? `hidden` : `block` } sx={{ width: '100%',position:'absolute' }}>
-                    <ListItem className="flex flex-col bg-white text-black rounded" disablePadding>
-                      <ListItemButton className='drawer-item' sx={{ textAlign: 'center', justifyItems: 'center', display: 'flex',width:'100%' ,marginTop: '6px' }}>
-                        <a href="/">Shopping</a>
-                      </ListItemButton>
-                      <ListItemButton className='drawer-item' sx={{ textAlign: 'center', justifyItems: 'center', display: 'flex',width:'100%' ,marginTop: '6px' }}>
-                        <a href="/">Marketing</a>
-                      </ListItemButton>
-                    </ListItem>
+                <List className={open ? `hidden` : `block`} sx={{ width: '100%', position: 'absolute' }}>
+                  <ListItem className="flex flex-col bg-white text-black rounded" disablePadding>
+                    <ListItemButton className='drawer-item' sx={{ textAlign: 'center', justifyItems: 'center', display: 'flex', width: '100%', marginTop: '6px' }}>
+                      <a href="/">Shopping</a>
+                    </ListItemButton>
+                    <ListItemButton className='drawer-item' sx={{ textAlign: 'center', justifyItems: 'center', display: 'flex', width: '100%', marginTop: '6px' }}>
+                      <a href="/">Marketing</a>
+                    </ListItemButton>
+                  </ListItem>
                 </List>
               </div>
             </div>
@@ -168,6 +216,15 @@ const Navbar = (props) => {
           <Toolbar />
         </Box> */}
       </Box>
+
+      {/* Register Seller */}
+
+
+      {seller && (
+        <section className=' absolute top-40  w-full flex justify-center'>
+          <RegisterSeller toggleSeller={toggleSeller} />
+        </section>
+      )}
 
 
     </div>

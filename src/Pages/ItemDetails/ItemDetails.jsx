@@ -1,41 +1,55 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-
-import placeholder from '../../Assets/images/home-placeholder.jpeg'
-
-// components
-import TopDealsData from '../../components/Data/TopDealsData';
-import { Button } from '@mui/material';
-import RemoveRedEyeOutlinedIcon from '@mui/icons-material/RemoveRedEyeOutlined'
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos'
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
-import { Skeleton } from '@mui/material';
-import { useState, useEffect } from "react";
+import placeholder from '../../Assets/images/home-placeholder.jpeg';
+import { Button, Skeleton } from '@mui/material';
+import RemoveRedEyeOutlinedIcon from '@mui/icons-material/RemoveRedEyeOutlined';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 const ItemDetails = () => {
-  const { itemId } = useParams();
-  const item = TopDealsData.find((item) => item.productCode === itemId);
+  const { idl_product_code, supplier_id } = useParams();
+  const [item, setItem] = useState(null);
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [availableMaterials, setAvailableMaterials] = useState(item.quantity);
+  const [largeImage, setLargeImage] = useState(!item ? "" : item.main_picture);
 
-  // Skeleton animation='wave' loader 
+
   useEffect(() => {
-    setTimeout(() => {
-      setLoading(false);
-    }, 9000);
-  });
+    const fetchItemDetails = async () => {
+      const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
+      const url = `https://tencowry-api-staging.onrender.com/api/v1/ecommerce/product/detail/${idl_product_code}/${supplier_id}`;
+
+      try {
+        const response = await fetch( url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-access-token': apiKey
+          },
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
+        const data = await response.json();
+        setItem(data.data);
+        console.log(data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching item details:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchItemDetails();
+  }, [idl_product_code, supplier_id]);
 
   // if item does not exist
-  if (!item) {
-    return <div>Item not found bro</div>;
+  if (!item && !loading) {
+    return <div>Item not found</div>;
   }
 
-
-
-
   const handleIncrement = () => {
-    if (count < availableMaterials) {
+    if (item && count < item.product_variants.length > 0 && item.product_variants[0].stock_quantity) {
       setCount(count + 1);
     }
   };
@@ -45,6 +59,11 @@ const ItemDetails = () => {
       setCount(count - 1);
     }
   };
+
+  const changeImage = (e, image) => {
+    e.preventDefault();
+    setLargeImage(image);
+  }
 
   return (
     <div className='grid lg:grid-cols-2 lg:p-12 p-4 mt-8 mb-16 gap-8'>
@@ -60,7 +79,7 @@ const ItemDetails = () => {
                 <RemoveRedEyeOutlinedIcon className='!text-white' />
                 <p>Preview</p>
               </div>
-              <img src={item.image} alt={item.name} className=' h-full w-[400px] rounded object-cover' />
+              <img src={largeImage} alt={item.product_name} className=' h-full w-[400px] rounded object-cover' />
             </>
           )}
         </div>
@@ -75,10 +94,9 @@ const ItemDetails = () => {
           </div>
         ) : (
           <div className='flex items-center justify-center mt-4 gap-4'>
-            <img className='h-[60px] w-[60px] object-cover rounded hover:border border-[#ff5c40] cursor-pointer hover:scale-90 transition ease-in delay-150 hover:scale-100' src={placeholder} alt="" />
-            <img className='h-[60px] w-[60px] object-cover rounded hover:border border-[#ff5c40] cursor-pointer hover:scale-90 transition ease-in delay-150 hover:scale-100' src={placeholder} alt="" />
-            <img className='h-[60px] w-[60px] object-cover rounded hover:border border-[#ff5c40] cursor-pointer hover:scale-90 transition ease-in delay-150 hover:scale-100' src={placeholder} alt="" />
-            <img className='h-[60px] w-[60px] object-cover rounded hover:border border-[#ff5c40] cursor-pointer hover:scale-90 transition ease-in delay-150 hover:scale-100' src={placeholder} alt="" />
+            {item.other_pictures.map((pic)=>(
+              <img onClick={(e) => changeImage(e, pic)} className='h-[60px] w-[60px] object-cover rounded hover:border border-[#ff5c40] cursor-pointer hover:scale-90 transition ease-in delay-150 hover:scale-100' src={pic} alt="" />
+            ))}
           </div>
         )}
       </div>
@@ -92,8 +110,8 @@ const ItemDetails = () => {
             </>
           ) : (
             <>
-              <h1 className='lg:text-2xl text-gray-400'>{item.name}</h1>
-              <p className='text-green-600 font-semibold'>{item.currentPrice}</p>
+              <h1 className='lg:text-3xl text-gray-400'>{item.category}</h1>
+              <p className='text-green-600 font-semibold lg:text-2xl'>₦{item.product_variants.length > 0 && item.product_variants[0].product_rrp_naira}</p>
             </>
           )}
 
@@ -119,7 +137,7 @@ const ItemDetails = () => {
             ) : (
               <>
                 <h1>Colour :</h1>
-                <h1>N/A</h1>
+                <h1 className='text-gray-400'>{item.product_variants.length > 0 && item.product_variants[0].colour}</h1>
               </>
             )}
           </div>
@@ -129,7 +147,7 @@ const ItemDetails = () => {
             ) : (
               <>
                 <h1>Size :</h1>
-                <h1>N/A</h1>
+                <h1 className='text-gray-400'>N/A</h1>
               </>
             )}
           </div>
@@ -139,7 +157,7 @@ const ItemDetails = () => {
             ) : (
               <>
                 <h1>Stock Quantity :</h1>
-                <h1>{item.quantity}</h1>
+                <h1 className='text-gray-400'>{item.product_variants.length > 0 && item.product_variants[0].stock_quantity}</h1>
               </>
             )}
           </div>
@@ -149,7 +167,7 @@ const ItemDetails = () => {
             ) : (
               <>
                 <h1>Brand :</h1>
-                <h1>{item.Brand}</h1>
+                <h1>{item.brand}</h1>
               </>
             )}
           </div>
@@ -159,7 +177,7 @@ const ItemDetails = () => {
             ) : (
               <>
                 <h1>Product Code :</h1>
-                <h1>{item.productCode}</h1>
+                <h1 className='text-green-400 font-italic'>{item.idl_product_code}</h1>
               </>
             )}
           </div>
@@ -192,7 +210,7 @@ const ItemDetails = () => {
               ) : (
                 <>                
                   <h1>Product Description :</h1>
-                  <h1 className='text-gray-600 font-bold '>NOUEZ MOI TRAVEL SPRAY + 3 RIC.10ML</h1>
+                  <h1 className='text-gray-600 font-bold '>{item.description}</h1>
                 </>
               ) }
             </div>

@@ -1,17 +1,8 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-
-import TopDealsData from '../../components/Data/TopDealsData'
-
-// mui
-import { Box } from '@mui/material';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import { Favorite } from "@mui/icons-material";
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
+import { Box, Tabs, Tab, Skeleton, Button } from '@mui/material';
+import { Favorite, ShoppingCart as ShoppingCartIcon } from "@mui/icons-material";
 import PropTypes from 'prop-types';
-import { useState, useEffect } from "react";
-import { Skeleton } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 
 function CustomTabPanel(props) {
@@ -60,144 +51,164 @@ const useStyles = makeStyles({
 });
 
 const TopDealsComponent = () => {
-  const [value, setValue] = React.useState(0);
+  const classes = useStyles();
+  const [value, setValue] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [deals, setDeals] = useState([]);
+  const [error, setError] = useState(null);
+
+  const categories = ['fashion', 'homeWares', 'beauty', 'electronics', 'sports', 'generalMerchandise'];
+  const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
+
+  const fetchDeals = async (category) => {
+    setLoading(true);
+    const url = `https://tencowry-api-staging.onrender.com/api/v1/ecommerce/product/topdeals/general_Merchandise?skip=0&limit=20`;
+
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': apiKey
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch data');
+      }
+
+      const data = await response.json();
+      setDeals(data.data || []);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDeals(categories[value]);
+  }, [value]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
-  // Skeleton animation='wave' loader 
-  useEffect(() => {
-    setTimeout(() => {
-      setLoading(false);
-    }, 9000);
-  });
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
-  const classes = useStyles();
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
-  // filter according to tags
-  const fashiontag = TopDealsData.filter(item => item.tag === 'fashion');
-  const beautytag = TopDealsData.filter(item => item.tag === 'beauty');
-
+  if (!Array.isArray(deals)) {
+    return <div>Error: Invalid data format</div>;
+  }
 
   return (
     <div className='bg-[#f2f2f2] py-8 flex flex-col gap-4'>
-
       <div className='w-full lg:p-8'>
-        <Tabs className={classes.tabs} indicatorColor={""} classes={{ indicator: classes.indicator }} value={value} onChange={handleChange} >
+        <Tabs className={`${classes.tabs} overflow-x-scroll`} indicatorColor={""} classes={{ indicator: classes.indicator }} value={value} onChange={handleChange}>
           <Tab color='secondary' className='tab-button sm:text-xs' label="Fashion & Accessories" {...a11yProps(0)} />
-          <Tab color='secondary' className='tab-button' label="Beauty & Personal Care" {...a11yProps(1)} />
+          <Tab color='secondary' className='tab-button' label="Home Wares" {...a11yProps(1)} />
+          <Tab color='secondary' className='tab-button' label="Beauty & Personal Care" {...a11yProps(2)} />
+          <Tab color='secondary' className='tab-button' label="Electronic & Games" {...a11yProps(3)} />
+          <Tab color='secondary' className='tab-button' label="Sports" {...a11yProps(4)} />
+          <Tab color='secondary' className='tab-button' label="General Merchandise" {...a11yProps(5)} />
         </Tabs>
       </div>
 
       <CustomTabPanel value={value} index={0}>
-        <section className='grid lg:grid-cols-4 2xl:grid-cols-5 w-full gap-4'>
+        <section className='grid lg:grid-cols-3 2xl:grid-cols-4 w-full gap-4 lg:px-32'>
           {loading ? (
-            // if loading
-            <>
-              {fashiontag.map((data, ind) => (
-                <div key={data.id} className=' rounded-[20px] h-[400px] lg:w-full w-[300px] mt-4'>
-                  <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '20px 20px 0 0' }} height={200} />
+            deals.map((data) => (
+              <div key={data.product_id} className='rounded-[20px] h-[400px] lg:w-full w-[300px] mt-4'>
+                <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '20px 20px 0 0' }} height={200} />
+                <div className="bg-white p-6 flex flex-col gap-2 rounded-b-lg">
+                  <Skeleton animation='wave' height={40} width={200} variant='text' />
+                  <div className="flex items-center justify-between font-bold text-sm">
+                    <Skeleton animation='wave' height={10} width={100} variant='text' />
+                    <Skeleton animation='wave' height={10} width={100} variant='text' />
+                    <Skeleton animation='wave' height={10} width={100} variant='text' />
+                  </div>
+                  <div className="w-full flex cursor-pointer items-center justify-end">
+                    <Skeleton animation='wave' height={40} width={40} variant='rectangle' />
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            deals.map((item) => (
+              <Link key={item.product_id} to={`/product/detail/${item.idl_product_code}/${item.supplier_id}`}>
+                <div className='rounded-[20px] h-[400px] lg:w-full w-[300px] mt-4'>
+                  <img className="h-[200px] w-full object-cover rounded-t-lg" src={item.main_picture} alt={item.product_name} />
+                  <Favorite titleAccess="Add to Favorites" className="FavoriteIcon text-gray-400 text-sm absolute top-2 right-2 hover:text-black" />
                   <div className="bg-white p-6 flex flex-col gap-2 rounded-b-lg">
-                    <Skeleton animation='wave' height={40} width={200} variant='text' />
+                    <h1 className="text-gray-500 font-bold text-sm line-clamp-1">{item.product_name}</h1>
                     <div className="flex items-center justify-between font-bold text-sm">
-                      <Skeleton animation='wave' height={10} width={100} variant='text' />
-                      <Skeleton animation='wave' height={10} width={100} variant='text' />
-                      <Skeleton animation='wave' height={10} width={100} variant='text' />
+                      <p className="text-gray-500 line-through">₦{item.product_variants.length > 0 && item.product_variants[0].naira_price}</p>
+                      <p className="text-green-400">₦{item.product_variants.length > 0 && item.product_variants[0].product_rrp_naira}</p>
+                      <p className="text-red-400">₦{item.product_variants.length > 0 && item.product_variants[0].product_discount}</p>
                     </div>
                     <div className="w-full flex cursor-pointer items-center justify-end">
-                      <Skeleton animation='wave' height={40} width={40} variant='rectangle' />
+                      <Button className='!text-white !w-full !bg-green-500 !normal-case'>Add To Cart</Button>
                     </div>
                   </div>
                 </div>
-              ))}
-            </>
-          ) : (
-            // after loading
-            <>
-              {fashiontag.map((data, ind) => (
-                <Link to={`/item/${data.productCode}`} key={data.id}>
-                  <img className="h-[200px] w-full object-cover rounded-t-lg" src={data.image} alt={data.name} />
-                  <Favorite titleAccess="Add to Favorites" className="FavoriteIcon text-gray-400 text-sm absolute top-2 right-2 hover:text-black" />
-                  <div className="bg-white p-6 flex flex-col gap-2 rounded-b-lg">
-                    <h1 className="text-gray-500 font-bold text-sm line-clamp-1">{data.name}</h1>
-                    <div className="flex items-center justify-between font-bold text-sm">
-                      <p className="text-gray-500 line-through">{data.formerPrice}</p>
-                      <p className="text-green-400">{data.currentPrice}</p>
-                      <p className="text-red-400">{data.discountRate}</p>
-                    </div>
-                    <Link to={`/item/${data.productCode}`}>                    
-                      <div className="w-full flex cursor-pointer items-center justify-end">
-                        <div className="w-max self-end p-2 rounded-lg bg-white border border-gray-300 hover:bg-[#ff5c40] transition ease-in delay-150">
-                          <ShoppingCartIcon className="cart-icon" />
-                        </div>
-                      </div>
-                    </Link>
-                  </div>
-                </Link>
-              ))}
-            </>
+              </Link>
+            ))
           )}
         </section>
       </CustomTabPanel>
 
-
-
+      {/* Repeat CustomTabPanel for other categories with different index values */}
       <CustomTabPanel value={value} index={1}>
         <div className='grid lg:grid-cols-4 2xl:grid-cols-5 w-full gap-4'>
           {loading ? (
-            // if loading
-            <>
-              {beautytag.map((data, ind) => (
-                <div key={data.id} className=' rounded-[20px] h-[400px] lg:w-full w-[300px] mt-4'>
-                  <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '20px 20px 0 0' }} height={200} />
-                  {/* <div className="h-[60%] bg rounded-t-[20px]" style={{ backgroundImage: `url(${data.image}) ` }}></div> */}
+            deals.map((data) => (
+              <div key={data.id} className='rounded-[20px] h-[400px] lg:w-full w-[300px] mt-4'>
+                <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '20px 20px 0 0' }} height={200} />
+                <div className="bg-white p-6 flex flex-col gap-2 rounded-b-lg">
+                  <Skeleton animation='wave' height={40} width={200} variant='text' />
+                  <div className="flex items-center justify-between font-bold text-sm">
+                    <Skeleton animation='wave' height={10} width={100} variant='text' />
+                    <Skeleton animation='wave' height={10} width={100} variant='text' />
+                    <Skeleton animation='wave' height={10} width={100} variant='text' />
+                  </div>
+                  <div className="w-full flex cursor-pointer items-center justify-end">
+                    <Skeleton animation='wave' height={40} width={40} variant='rectangle' />
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            deals.map((item) => (
+              <Link key={item.product_id} to={`/product/detail/${item.idl_product_code}/${item.supplier_id}`}>
+                <div className='rounded-[20px] h-[400px] lg:w-full w-[300px] mt-4'>
+                  <img className="h-[200px] w-full object-cover rounded-t-lg" src={item.main_picture} alt={item.product_name} />
+                  <Favorite titleAccess="Add to Favorites" className="FavoriteIcon text-gray-400 text-sm absolute top-2 right-2 hover:text-black" />
                   <div className="bg-white p-6 flex flex-col gap-2 rounded-b-lg">
-                    <Skeleton animation='wave' height={40} width={200} variant='text' />
+                    <h1 className="text-gray-500 font-bold text-sm line-clamp-1">{item.product_name}</h1>
                     <div className="flex items-center justify-between font-bold text-sm">
-                      <Skeleton animation='wave' height={10} width={100} variant='text' />
-                      <Skeleton animation='wave' height={10} width={100} variant='text' />
-                      <Skeleton animation='wave' height={10} width={100} variant='text' />
+                      <p className="text-gray-500 line-through">₦{item.product_variants.length > 0 && item.product_variants[0].naira_price}</p>
+                      <p className="text-green-400">₦{item.product_variants.length > 0 && item.product_variants[0].product_rrp_naira}</p>
+                      <p className="text-red-400">₦{item.product_variants.length > 0 && item.product_variants[0].product_discount}</p>
                     </div>
                     <div className="w-full flex cursor-pointer items-center justify-end">
-                      <Skeleton animation='wave' height={40} width={40} variant='rectangle' />
+                      <Button className='!text-white !w-full !bg-green-500 !normal-case'>Add To Cart</Button>
                     </div>
                   </div>
                 </div>
-              ))}
-            </>
-          ) : (
-            // after loading
-            <>
-              {beautytag.map((data, ind) => (
-                <Link to={`/item/${data.productCode}`} key={data.id}>
-                  <img className="h-[200px] w-full object-cover rounded-t-lg" src={data.image} alt={data.name} />
-                  <Favorite titleAccess="Add to Favorites" className="FavoriteIcon text-gray-400 text-sm absolute top-2 right-2 hover:text-black" />
-                  <div className="bg-white p-6 flex flex-col gap-2 rounded-b-lg">
-                    <h1 className="text-gray-500 font-bold text-sm line-clamp-1">{data.name}</h1>
-                    <div className="flex items-center justify-between font-bold text-sm">
-                      <p className="text-gray-500 line-through">{data.formerPrice}</p>
-                      <p className="text-green-400">{data.currentPrice}</p>
-                      <p className="text-red-400">{data.discountRate}</p>
-                    </div>
-                    <Link to={`/item/${data.productCode}`} className="w-full flex cursor-pointer items-center justify-end">
-                      <div className="w-max self-end p-2 rounded-lg bg-white border border-gray-300 hover:bg-[#ff5c40] transition ease-in delay-150">
-                        <ShoppingCartIcon className="cart-icon" />
-                      </div>
-                    </Link>
-                  </div>
-                </Link>
-              ))}
-            </>
+              </Link>
+            ))
           )}
         </div>
       </CustomTabPanel>
 
-
-
+      {/* Add more CustomTabPanel components for other categories */}
     </div>
-  )
+  );
 }
 
-export default TopDealsComponent
+export default TopDealsComponent;

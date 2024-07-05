@@ -1,31 +1,34 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import './index.css'
+import App from './App'
+
+// Authentication
+import { Register, Login } from './components'
+import { AuthProvider } from './Context/AuthContext'
+import PrivateRoute from './Utils/PrivateRoute'
 
 // pages
-import { TopDeals, PopularProducts, NewArrivals, Item } from './Pages';
+import { TopDeals, PopularProducts, NewArrivals, Item } from './Pages'
 
-import { render } from "react-dom";
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-} from "react-router-dom";
-
+import { render } from 'react-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
 render(
   <BrowserRouter>
+    <AuthProvider>
       <Routes>
-        <Route path="/" element={<App />}></Route>
-        <Route path="/top-deals" element={<TopDeals />}/>
-        <Route path="/popular-products" element={<PopularProducts />}/>
-        <Route path="/new-arrivals" element={<NewArrivals />}/>
+        <Route path='/' element={<App />}></Route>
+        <Route path='/top-deals' element={<TopDeals />} />
+        <Route path='/popular-products' element={<PopularProducts />} />
+        <Route path='/new-arrivals' element={<NewArrivals />} />
+        <Route path='/login' element={<Login />} />
+        <Route path='/register' element={<Register />} />
 
         {/* item details */}
-        <Route path="/item/:itemId" element={<Item />}/>
-
+        <Route path='/product/detail/:idl_product_code/:supplier_id' element={<Item />} />
       </Routes>
+    </AuthProvider>
   </BrowserRouter>,
-  document.getElementById("root")
-);
+  document.getElementById('root')
+)
