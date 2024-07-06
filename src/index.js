@@ -9,7 +9,7 @@ import { AuthProvider } from './Context/AuthContext'
 import PrivateRoute from './Utils/PrivateRoute'
 
 // pages
-import { TopDeals, PopularProducts, NewArrivals, Item } from './Pages'
+import { TopDeals, PopularProducts, NewArrivals, Item, Cart } from './Pages'
 
 import { render } from 'react-dom'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
@@ -24,6 +24,7 @@ render(
         <Route path='/new-arrivals' element={<NewArrivals />} />
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
+        <Route path='/Cart' element={<Cart />} />
 
         {/* item details */}
         <Route path='/product/detail/:idl_product_code/:supplier_id' element={<Item />} />

@@ -50,7 +50,7 @@ const useStyles = makeStyles({
   }
 });
 
-const TopDealsComponent = () => {
+const PopularProductsComponent = () => {
   const classes = useStyles();
   const [value, setValue] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -62,7 +62,7 @@ const TopDealsComponent = () => {
 
   const fetchDeals = async (category) => {
     setLoading(true);
-    const url = `https://tencowry-api-staging.onrender.com/api/v1/ecommerce/product/topdeals/${category}?skip=0&limit=20`;
+    const url = `https://tencowry-api-staging.onrender.com/api/v1/ecommerce/product/popular/${category}?skip=0&limit=20`;
 
     try {
       const response = await fetch(url, {
@@ -164,7 +164,7 @@ const TopDealsComponent = () => {
 
       {/* Repeat CustomTabPanel for other categories with different index values */}
       <CustomTabPanel value={value} index={1}>
-        <section className='grid lg:grid-cols-3 2xl:grid-cols-4 w-full gap-4 lg:px-32'>
+        <div className='grid lg:grid-cols-4 2xl:grid-cols-5 w-full gap-4'>
           {loading ? (
             deals.map((data) => (
               <div key={data.id} className='rounded-[20px] h-[400px] lg:w-full w-[300px] mt-4'>
@@ -203,7 +203,7 @@ const TopDealsComponent = () => {
               </Link>
             ))
           )}
-        </section>
+        </div>
       </CustomTabPanel>
 
       {/* Add more CustomTabPanel components for other categories */}
@@ -211,4 +211,4 @@ const TopDealsComponent = () => {
   );
 }
 
-export default TopDealsComponent;
+export default PopularProductsComponent;

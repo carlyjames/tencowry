@@ -18,6 +18,9 @@ import "swiper/css";
 import "swiper/css/pagination";
 import { Pagination, Navigation, Autoplay } from "swiper/modules";
 
+// Placeholder image
+import placeholderImage from '../Assets/images/home-placeholder.jpeg'
+
 const TopDeals = () => {
   const [loading, setLoading] = useState(true);
   const [deals, setDeals] = useState([]);
@@ -68,7 +71,7 @@ const TopDeals = () => {
   }
 
   return (
-    <div className=" mt-12 mb-24 w-full pb-8">
+    <div className="mt-12 mb-24 w-full pb-8">
       <div className="flex items-center gap-2 lg:text-2xl text-xl border-b-2 border-gray-300">
         <FlashOnIcon sx={{ color: '#ff5c40' }} />
         <h1 className="border-b-2 border-[#ff5c40]">Top Deals</h1>
@@ -94,12 +97,16 @@ const TopDeals = () => {
             1536: { slidesPerView: 5, spaceBetween: 20 }
           }}
           modules={[Autoplay, Pagination, Navigation]}
-          className="mySwiper relative  mt-2 w-full p-4 px-4"
+          className="mySwiper relative mt-2 w-full p-4 px-4"
         >
           {deals.map((item) => (
             <SwiperSlide className="swiperItem relative max:h-[400px] cursor-pointer rounded-lg shadow-lg mb-2 transition ease-in delay-150" key={item.id}>
               <Link key={item.product_id} to={`/product/detail/${item.idl_product_code}/${item.supplier_id}`}>
-                <img className="h-[200px] w-full object-cover rounded-t-lg" src={item.main_picture} alt={item.product_name} />
+                <img 
+                  className="h-[200px] w-full object-cover rounded-t-lg" 
+                  src={item.main_picture ? item.main_picture : placeholderImage}  
+                  alt={item.product_name} 
+                />
                 <Favorite titleAccess="Add to Favorites" className="FavoriteIcon text-gray-400 text-sm absolute top-2 right-2 hover:text-black" />
                 <div className="bg-white p-6 flex flex-col gap-2 rounded-b-lg">
                   <h1 className="text-gray-500 font-bold text-sm line-clamp-1">{item.product_name}</h1>
@@ -108,7 +115,7 @@ const TopDeals = () => {
                       ₦{item.product_variants.length > 0 && item.product_variants[0].naira_price}
                     </p>
                     <p className="text-green-400">
-                    ₦{item.product_variants.length > 0 && item.product_variants[0].product_rrp_naira}
+                      ₦{item.product_variants.length > 0 && item.product_variants[0].product_rrp_naira}
                     </p>
                     <p className="text-red-400">
                       ₦{item.product_variants.length > 0 && item.product_variants[0].product_discount}
@@ -133,7 +140,6 @@ const TopDeals = () => {
               <ArrowRightIcon sx={{ color: 'white' }} />
             </div>
           </div>
-
         </Swiper>
       </>
 
@@ -142,7 +148,6 @@ const TopDeals = () => {
         <img src={ad1} className="cursor-pointer " alt="top collection" />
         <img src={ad2} className="cursor-pointer " alt="top-collection" />
       </div>
-
     </div>
   )
 }

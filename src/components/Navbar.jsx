@@ -120,8 +120,8 @@ const Navbar = (props) => {
         </div>
         <div className='flex items-center gap-3'>
           <Button className='text-small mui-btn' onClick={toggleSeller} sx={{ background: '#ff5c40', color: 'white', display: { xs: 'none', sm: 'flex' } }}>BECOME A SELLER</Button>
-          <a className='lg:text-lg font-light' href="/">₦ Naira</a>
-          <a className='text-lg font-light lg:block hidden' href="/">English</a>
+          <a className='lg:text-md font-light' href="/">₦ Naira</a>
+          <a className='text-md font-light lg:block hidden' href="/">English</a>
         </div>
       </div>
 
@@ -136,26 +136,28 @@ const Navbar = (props) => {
         {/* search bar */}
         <form onSubmit={handleSearch} className='lg:flex items-center justify-center hidden'>
           <input value={query} onChange={handleInputChange} className='border-0 p-3 w-full bg-white text-black rounded-l-lg  ' type="text" placeholder='enter full word e.g women not wom' />
-          <IconButton type='submit' sx={{ background: '#ff5c40', borderRadius: '0 8px 8px 0', padding: '10px' }}>
+          <IconButton className="searchBar" type='submit' sx={{ background: '#ff5c40', borderRadius: '0 8px 8px 0', padding: '10px' }}>
             <Search sx={{ color: 'white' }} />
           </IconButton>
           {loading && <p>Loading...</p>}
-          {error && <p>Error: {error}</p>}
+          {/* {error && <p>Error: {error}</p>} */}
         </form>
-        <div>
+        {/* <div>
           {results.map(result => (
             <div key={result.id}>
               <h2>{result.product_name}</h2>
             </div>
           ))}
-        </div>
+        </div> */}
         {/* cart */}
         <div className=' flex items-center justify-end'>
-          <IconButton>
-            <Badge badgeContent='0' color="error">
-              <ShoppingCartIcon sx={{ color: 'white' }} />
-            </Badge>
-          </IconButton>
+          <Link to='/Cart'>          
+            <IconButton>
+              <Badge badgeContent='0' color="error">
+                <ShoppingCartIcon sx={{ color: 'white' }} />
+              </Badge>
+            </IconButton>
+          </Link>
         </div>
       </div>
 

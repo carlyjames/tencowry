@@ -11,7 +11,7 @@ const ItemDetails = () => {
   const [item, setItem] = useState(null);
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [largeImage, setLargeImage] = useState(!item ? "" : item.main_picture);
+  // const [largeImage, setLargeImage] = useState(!item ? "" : item.main_picture);
 
 
   useEffect(() => {
@@ -60,10 +60,10 @@ const ItemDetails = () => {
     }
   };
 
-  const changeImage = (e, image) => {
-    e.preventDefault();
-    setLargeImage(image);
-  }
+  // const changeImage = (e, image) => {
+  //   e.preventDefault();
+  //   setLargeImage(image);
+  // }
 
   return (
     <div className='grid lg:grid-cols-2 lg:p-12 p-4 mt-8 mb-16 gap-8'>
@@ -79,7 +79,8 @@ const ItemDetails = () => {
                 <RemoveRedEyeOutlinedIcon className='!text-white' />
                 <p>Preview</p>
               </div>
-              <img src={largeImage} alt={item.product_name} className=' h-full w-[400px] rounded object-cover' />
+              {/* <img src={largeImage} alt={item.product_name} className=' h-full w-[400px] rounded object-cover' /> */}
+              <img src={item.main_picture} alt={item.product_name} className=' h-full w-[400px] rounded object-cover' />
             </>
           )}
         </div>
@@ -95,7 +96,8 @@ const ItemDetails = () => {
         ) : (
           <div className='flex items-center justify-center mt-4 gap-4'>
             {item.other_pictures.map((pic)=>(
-              <img onClick={(e) => changeImage(e, pic)} className='h-[60px] w-[60px] object-cover rounded hover:border border-[#ff5c40] cursor-pointer hover:scale-90 transition ease-in delay-150 hover:scale-100' src={pic} alt="" />
+              // <img onClick={(e) => changeImage(e, pic)} className='h-[60px] w-[60px] object-cover rounded hover:border border-[#ff5c40] cursor-pointer hover:scale-90 transition ease-in delay-150 hover:scale-100' src={pic} alt="" />
+              <img  className='h-[60px] w-[60px] object-cover rounded hover:border border-[#ff5c40] cursor-pointer hover:scale-90 transition ease-in delay-150 hover:scale-100' src={pic} alt="" />
             ))}
           </div>
         )}
