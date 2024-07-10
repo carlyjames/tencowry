@@ -38,6 +38,18 @@ const Navbar = (props) => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const token = localStorage.getItem("authTokens");
+  let email = '';
+
+  if (token) {
+    try {
+      const parsedToken = JSON.parse(token);
+      email = parsedToken.data.email;
+    } catch (error) {
+      console.error("Error parsing token:", error.message);
+    }
+  }
+  console.log(token); 
 
   const handleDrawerToggle = () => {
     setMobileOpen((prevState) => !prevState);
@@ -50,6 +62,8 @@ const Navbar = (props) => {
   const toggleSeller = () => {
     setSeller((prevState) => !prevState);
   }
+
+
 
   const drawer = (
     <div className='h-[100vh] flex flex-col items-start justify-center gap'>
@@ -111,12 +125,18 @@ const Navbar = (props) => {
       {/* first layer */}
       <div className='flex lg:px-6 px-4 lg:pt-2 items-center justify-between w-full '>
         <div className='flex items-center gap-2 '>
-          <p className='font-extra'>Welcome to TenCowry!</p>
-          <div className='flex items-center gap-1'>
-            <Link className='text-[#ff5c40]' to='/login' >Login </Link>
-            <span className=''>or</span>
-            <Link className='text-[#ff5c40]' to='/register' >Register </Link>
-          </div>
+          <p className='font-extra'>Welcome to TenCowry! </p>
+          {email ? (
+            <div className='flex items-center gap-1'>
+              <Link className='text-[#ff5c40]' to='/login' >Logout </Link>
+            </div>
+          ) : (
+            <div className='flex items-center gap-1'>
+              <Link className='text-[#ff5c40]' to='/login' >Login </Link>
+              <span className=''>or</span>
+              <Link className='text-[#ff5c40]' to='/register' >Register </Link>
+            </div>
+          )}
         </div>
         <div className='flex items-center gap-3'>
           <Button className='text-small mui-btn' onClick={toggleSeller} sx={{ background: '#ff5c40', color: 'white', display: { xs: 'none', sm: 'flex' } }}>BECOME A SELLER</Button>

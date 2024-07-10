@@ -107,7 +107,7 @@ const NewArrivals = () => {
         >
           {deals.map((item) => (
             <SwiperSlide className="swiperItem max:h-[400px] cursor-pointer rounded-lg shadow-lg mb-2 transition ease-in delay-150" key={item.id}>
-              <Link to={`/item/${item.productCode}`}>
+              <Link to={`/product/detail/${item.idl_product_code}/${item.supplier_id}`}>
                 <img className="h-[200px] w-full object-cover rounded-t-lg" src={item.main_picture} alt={item.product_name} />
                 <Favorite titleAccess="Add to Favorites" className="FavoriteIcon text-gray-400 text-sm absolute top-2 right-2 hover:text-black" />
                 <div className="bg-white p-6 flex flex-col gap-2 rounded-b-lg">

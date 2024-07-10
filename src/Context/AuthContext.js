@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useState, useEffect } from 'react';
-import {jwtDecode} from 'jwt-decode'; // Corrected import
+import {jwtDecode} from 'jwt-decode'; 
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
@@ -44,16 +44,25 @@ export const AuthProvider = ({ children }) => {
       });
   
       const data = await response.json();
-      console.log('Response Status:', response.status); // Log the response status
-      console.log('Response Data:', data); // Log the response data
   
-      if (response.ok && data.access) { // Ensure the condition is correct
+      if (response.ok && data.status) { 
         console.log('Logged In');
         setAuthTokens(data);
   
         try {
-          const decodedToken = jwtDecode(data.access);
-          setUser(decodedToken);
+          setUser(data.data);
+
+          localStorage.setItem('authTokens', JSON.stringify(data));
+          navigate('/');
+          Swal.fire({
+            title: 'Login Successful',
+            icon: 'success',
+            toast: true,
+            timer: 6000,
+            position: 'top-right',
+            timerProgressBar: true,
+            showConfirmButton: false
+          });
         } catch (error) {
           console.error('Invalid token:', error);
           Swal.fire({
@@ -68,17 +77,6 @@ export const AuthProvider = ({ children }) => {
           return;
         }
   
-        localStorage.setItem('authTokens', JSON.stringify(data));
-        navigate('/');
-        Swal.fire({
-          title: 'Login Successful',
-          icon: 'success',
-          toast: true,
-          timer: 6000,
-          position: 'top-right',
-          timerProgressBar: true,
-          showConfirmButton: false
-        });
       } else {
         console.log('Failed Login Attempt', response.status);
         console.log('Server responded with:', data);
@@ -111,7 +109,7 @@ export const AuthProvider = ({ children }) => {
     const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
     const url = 'https://tencowry-api-staging.onrender.com/api/v1/ecommerce/signup/customer';
 
-    console.log('Sending request with data:', userData); // Log the request payload
+    console.log('Sending request with data:', userData); 
 
     try {
       const response = await fetch(url, {
@@ -130,10 +128,9 @@ export const AuthProvider = ({ children }) => {
       });
 
       const data = await response.json();
-      console.log('Response:', data); // Log the response data
+      console.log('Response:', data); 
 
       if (response.ok) {
-        // navigate('/login');
         Swal.fire({
           title: 'Registration Successful',
           icon: 'success',
@@ -174,7 +171,7 @@ export const AuthProvider = ({ children }) => {
     const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
     const url = 'https://tencowry-api-staging.onrender.com/api/v1/ecommerce/seller/prospective';
 
-    console.log('Sending request with data:', userData); // Log the request payload
+    console.log('Sending request with data:', userData); 
 
     try {
       const response = await fetch(url, {
@@ -186,10 +183,9 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({full_name, address_1, city, state, country, phone, email, brand_name}),});
 
       const data = await response.json();
-      console.log('Response:', data); // Log the response data
+      console.log('Response:', data); 
 
       if (response.ok) {
-        // navigate('/login');
         Swal.fire({
           title: 'Seller details has been captured',
           icon: 'success',
@@ -228,8 +224,7 @@ export const AuthProvider = ({ children }) => {
   const logoutUser = () => {
     setAuthTokens(null);
     setUser(null);
-    localStorage.removeItem('authTokens');
-    // navigate('/login');
+    localStorage.removeItem('authTokens')
     Swal.fire({
       title: 'You have been logged out...',
       icon: 'success',

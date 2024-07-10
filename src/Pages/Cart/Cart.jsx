@@ -38,8 +38,8 @@ const Cart = () => {
 
                     <div className='flex lg:flex-row flex-col w-full items-start mt-8 gap-4 lg:gap-32'>
                         {/* order details */}
-                        <div className='lg:w-2/3 bg-white text-sm shadow-xl gap-2 h-max lg:h-[200px] mb-8 rounded-md p-6 flex flex-col items-start justify-between'>
-                            <div className='flex lg:flex-row md:flex-col flex-col items-start gap-4 lg:gap-12'>
+                        <div className='lg:w-2/3 w-full bg-white text-sm shadow-xl gap-2 h-max lg:h-[200px] mb-8 rounded-md p-6 flex flex-col items-start justify-between'>
+                            <div className='flex lg:flex-row md:flex-col flex-col items-start gap-4 lg:gap-8'>
                                 <img className='h-[100px] w-[100px] object-cover' src={img} alt="" />
                                 {/* product details */}
                                 <div className='flex flex-col gap-3 items-start'>
