@@ -1,7 +1,9 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import NavItems from './Data/NavItems';
 import RegisterSeller from './RegisterSeller';
+import { CartContext } from '../Pages/ItemDetails/ItemDetails';
+
 // images
 import logo from '../Assets/images/logo_2_main.png'
 
@@ -38,6 +40,8 @@ const Navbar = (props) => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { cart } = useContext(CartContext);
+  const cartItemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
   const token = localStorage.getItem("authTokens");
   let email = '';
 
@@ -173,7 +177,7 @@ const Navbar = (props) => {
         <div className=' flex items-center justify-end'>
           <Link to='/Cart'>          
             <IconButton>
-              <Badge badgeContent='0' color="error">
+              <Badge badgeContent={cartItemCount} color="error">
                 <ShoppingCartIcon sx={{ color: 'white' }} />
               </Badge>
             </IconButton>

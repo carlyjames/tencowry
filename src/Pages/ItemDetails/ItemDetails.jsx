@@ -1,17 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import placeholder from '../../Assets/images/home-placeholder.jpeg';
 import { Button, Skeleton } from '@mui/material';
 import RemoveRedEyeOutlinedIcon from '@mui/icons-material/RemoveRedEyeOutlined';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import Swal from 'sweetalert2';
+
+// Context to manage the global cart state
+const CartContext = React.createContext();
 
 const ItemDetails = () => {
   const { idl_product_code, supplier_id } = useParams();
   const [item, setItem] = useState(null);
   const [count, setCount] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const token = localStorage.getItem("authTokens");
+  const { cart, setCart } = useContext(CartContext);
   let email = '';
 
   if (token) {
@@ -29,6 +34,7 @@ const ItemDetails = () => {
       const url = `https://tencowry-api-staging.onrender.com/api/v1/ecommerce/product/detail/${idl_product_code}/${supplier_id}`;
 
       try {
+        setLoading(true);
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -40,8 +46,8 @@ const ItemDetails = () => {
           throw new Error('Failed to fetch data');
         }
         const data = await response.json();
-        setItem(data.data);
         setLoading(false);
+        setItem(data.data);
       } catch (error) {
         console.error('Error fetching item details:', error);
         setLoading(false);
@@ -54,12 +60,12 @@ const ItemDetails = () => {
   const AddToCart = async () => {
     const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
     const url = `https://tencowry-api-staging.onrender.com/api/v1/ecommerce/cart/record/${email}`;
-  
+
     if (!item || !item.product_variants || !item.product_variants[0]) {
       console.error('Item or product variants are missing');
       return;
     }
-  
+
     const {
       product_id,
       category,
@@ -70,7 +76,7 @@ const ItemDetails = () => {
       currency_adder,
       exchange_rate,
     } = item;
-  
+
     const {
       product_rrp_naira: naira_price,
       product_cost,
@@ -79,9 +85,9 @@ const ItemDetails = () => {
       weight,
       product_sku,
     } = product_variants[0];
-  
+
     const payload = {
-      product_code: idl_product_code,
+      idl_product_code,
       supplier_id: supplier_id,
       product_sku: product_sku,
       product_id,
@@ -89,7 +95,7 @@ const ItemDetails = () => {
       category,
       sub_category,
       main_picture,
-      quantity: count,
+      quantity: 1, 
       naira_price, 
       product_cost, 
       currency,
@@ -99,8 +105,20 @@ const ItemDetails = () => {
       weight,
     };
 
-    // Log the payload for debugging
-    console.log("Payload:", JSON.stringify(payload, null, 2));
+    // Check if the item is already in the cart
+    const itemInCart = cart.find(cartItem => cartItem.product_sku === product_sku);
+    if (itemInCart) {
+      Swal.fire({
+        title: 'Item in cart already',
+        icon: 'warning',
+        toast: true,
+        timer: 6000,
+        position: 'top-right',
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+      return;
+    }
 
     try {
       const response = await fetch(url, {
@@ -120,16 +138,36 @@ const ItemDetails = () => {
       }
 
       const data = await response.json();
+      Swal.fire({
+        title: 'Item added to cart',
+        icon: 'success',
+        toast: true,
+        timer: 6000,
+        position: 'top-right',
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
       console.log('Item added to cart:', data);
+
+      // Update local storage and context state
+      const newCart = [...cart, payload];
+      setCart(newCart);
+      localStorage.setItem('cart', JSON.stringify(newCart));
     } catch (error) {
       console.error('Error adding item to cart:', error);
     }
   };
 
+  useEffect(() => {
+    const storedCart = localStorage.getItem('cart');
+    if (storedCart) {
+      setCart(JSON.parse(storedCart));
+    }
+  }, []);
+
   if (!item && !loading) {
     return <div>Item not found</div>;
   }
-
   const handleIncrement = () => {
     if (item && item.product_variants && count < item.product_variants[0].stock_quantity) {
       setCount(count + 1);
@@ -145,7 +183,6 @@ const ItemDetails = () => {
   return (
     <div className='grid lg:grid-cols-2 lg:p-12 p-4 mt-8 mb-16 gap-8'>
       <div className='px-4 border-2 border-gray-300 w-full p-2 flex flex-col items-center justify-center'>
-        {/* main image */}
         <div className='h-full lg:w-[400px] relative item-card'>
           {loading ? (
             <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '8px' }} height={300} width={300} />
@@ -160,7 +197,6 @@ const ItemDetails = () => {
           )}
         </div>
 
-        {/* other images */}
         {loading ? (
           <div className='flex items-center justify-center mt-4 gap-4'>
             <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '8px' }} height={60} width={60} />
@@ -186,9 +222,8 @@ const ItemDetails = () => {
             </>
           ) : (
             <>
-              <h1 className='lg:text-3xl text-gray-400'>{item.category}</h1>
-              <p className='text-green-600 font-semibold lg:text-2xl'>₦{item.product_variants[0].product_rrp_naira}</p>
-              {email}
+              <h1 className='lg:text-3xl text-2xl text-gray-400'>{item.category}</h1>
+              <p className='text-green-600 font-semibold text-2xl'>₦{item.product_variants[0].product_rrp_naira}</p>
             </>
           )}
         </div>
@@ -301,4 +336,23 @@ const ItemDetails = () => {
   );
 };
 
+// CartProvider component to wrap the application and provide cart context
+const CartProvider = ({ children }) => {
+  const [cart, setCart] = useState([]);
+
+  useEffect(() => {
+    const storedCart = localStorage.getItem('cart');
+    if (storedCart) {
+      setCart(JSON.parse(storedCart));
+    }
+  }, []);
+
+  return (
+    <CartContext.Provider value={{ cart, setCart }}>
+      {children}
+    </CartContext.Provider>
+  );
+};
+
+export { CartProvider, CartContext };
 export default ItemDetails;

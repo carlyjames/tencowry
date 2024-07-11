@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import PopUp from "./PopUp";
+
 // images
 import ad1 from '../Assets/images/TopDeals/id3-banner2.jpg';
 import ad2 from '../Assets/images/TopDeals/id3-banner3.jpg';
@@ -25,6 +27,9 @@ const TopDeals = () => {
   const [loading, setLoading] = useState(true);
   const [deals, setDeals] = useState([]);
   const [error, setError] = useState(null);
+  const [popUpOpen, setPopUpOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
 
   useEffect(() => {
     const fetchDeals = async () => {
@@ -70,6 +75,16 @@ const TopDeals = () => {
     return <div>Error: Invalid data format</div>;
   }
 
+  const handleOpenPopUp = (product) => {
+    setSelectedProduct(product);
+    setPopUpOpen(true);
+  };
+
+  const handleClosePopUp = () => {
+    setSelectedProduct(null);
+    setPopUpOpen(false);
+  };
+
   return (
     <div className="mt-12 mb-24 w-full pb-8">
       <div className="flex items-center gap-2 lg:text-2xl text-xl border-b-2 border-gray-300">
@@ -102,34 +117,32 @@ const TopDeals = () => {
           {deals.map((item) => (
             <SwiperSlide className="swiperItem relative max:h-[400px] cursor-pointer rounded-lg shadow-lg mb-2 transition ease-in delay-150" key={item.id}>
               <Link key={item.product_id} to={`/product/detail/${item.idl_product_code}/${item.supplier_id}`}>
-                <img 
-                  className="h-[200px] w-full object-cover rounded-t-lg" 
-                  src={item.main_picture ? item.main_picture : placeholderImage}  
-                  alt={item.product_name} 
+                <img
+                  className="h-[200px] w-full object-cover rounded-t-lg"
+                  src={item.main_picture ? item.main_picture : placeholderImage}
+                  alt={item.product_name}
                 />
-                <Favorite titleAccess="Add to Favorites" className="FavoriteIcon text-gray-400 text-sm absolute top-2 right-2 hover:text-black" />
-                <div className="bg-white p-6 flex flex-col gap-2 rounded-b-lg">
-                  <h1 className="text-gray-500 font-bold text-sm line-clamp-1">{item.product_name}</h1>
-                  <div className="flex items-center justify-between font-bold text-sm">
-                    <p className="text-gray-500 line-through">
-                      ₦{item.product_variants.length > 0 && item.product_variants[0].naira_price}
-                    </p>
-                    <p className="text-green-400">
-                      ₦{item.product_variants.length > 0 && item.product_variants[0].product_rrp_naira}
-                    </p>
-                    <p className="text-red-400">
-                      ₦{item.product_variants.length > 0 && item.product_variants[0].product_discount}
-                    </p>
-                  </div>
-                  <Link to={`/item/${item.productCode}`}>
-                    <div className="w-full flex cursor-pointer items-center justify-end">
-                      <div className="w-max self-end p-2 rounded-lg bg-white border border-gray-300 hover:bg-[#ff5c40] transition ease-in delay-150">
-                        <ShoppingCartIcon className="cart-icon" />
-                      </div>
-                    </div>
-                  </Link>
-                </div>
               </Link>
+              <Favorite titleAccess="Add to Favorites" className="FavoriteIcon text-gray-400 text-sm absolute top-2 right-2 hover:text-black" />
+              <div className="bg-white p-6 flex flex-col gap-2 rounded-b-lg">
+                <h1 className="text-gray-500 font-bold text-sm line-clamp-1">{item.product_name}</h1>
+                <div className="flex items-center justify-between font-bold text-sm">
+                  <p className="text-gray-500 line-through">
+                    ₦{item.product_variants.length > 0 && item.product_variants[0].naira_price}
+                  </p>
+                  <p className="text-green-400">
+                    ₦{item.product_variants.length > 0 && item.product_variants[0].product_rrp_naira}
+                  </p>
+                  <p className="text-red-400">
+                    ₦{item.product_variants.length > 0 && item.product_variants[0].product_discount}
+                  </p>
+                </div>
+                <div onClick={() => handleOpenPopUp(item)}  className="w-full flex cursor-pointer items-center justify-end">
+                  <div className="w-max self-end p-2 rounded-lg bg-white border border-gray-300 hover:bg-[#ff5c40] transition ease-in delay-150">
+                    <ShoppingCartIcon className="cart-icon" />
+                  </div>
+                </div>
+              </div>
             </SwiperSlide>
           ))}
           <div className="">
@@ -148,6 +161,13 @@ const TopDeals = () => {
         <img src={ad1} className="cursor-pointer " alt="top collection" />
         <img src={ad2} className="cursor-pointer " alt="top-collection" />
       </div>
+
+      {popUpOpen && (
+        <PopUp
+          product={selectedProduct}
+          handleClosePopUp={handleClosePopUp}
+        />
+      )}
     </div>
   )
 }

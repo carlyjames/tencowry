@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
     try {
       return tokens ? jwtDecode(tokens) : null;
     } catch (error) {
-      console.error('Invalid token during initialization', error);
+      // console.error('Invalid token during initialization', error);
       return null;
     }
   });
@@ -252,7 +252,7 @@ export const AuthProvider = ({ children }) => {
       try {
         setUser(jwtDecode(authTokens.access));
       } catch (error) {
-        console.error('Invalid token', error);
+        // console.error('Invalid token', error);
         setAuthTokens(null);
         setUser(null);
       }
