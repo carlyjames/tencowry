@@ -1,26 +1,32 @@
-import React, {useState, useContext} from "react";
+import React, { useState, useContext } from "react";
 import Swal from 'sweetalert2';
-
-
-import { Dialog, DialogContent, DialogTitle, Button, Skeleton } from "@mui/material";
+import { Dialog, DialogContent, DialogTitle, Button, Skeleton, IconButton } from "@mui/material";
 import RemoveRedEyeOutlinedIcon from '@mui/icons-material/RemoveRedEyeOutlined';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import IconButton from "@mui/material/IconButton";
 import { CancelOutlined } from "@mui/icons-material";
 import { CartContext } from "../Pages/ItemDetails/ItemDetails";
-// const CartContext = React.createContext();
-
 
 const PopUp = ({ product, handleClosePopUp }) => {
+    const token = localStorage.getItem("authTokens");
     const [loading, setLoading] = useState(false);
-    const [count, setCount] = useState(0);
+    const [count, setCount] = useState(0); 
     const { cart, setCart } = useContext(CartContext);
+    let email = '';
 
+    if (token) {
+        try {
+            const parsedToken = JSON.parse(token);
+            email = parsedToken.data.email;
+        } catch (error) {
+            console.error("Error parsing token:", error.message);
+        }
+    }
 
     if (!product) return null;
 
-    // Destructure product details
+
+
     const {
         product_name,
         category,
@@ -28,120 +34,158 @@ const PopUp = ({ product, handleClosePopUp }) => {
         other_pictures,
         product_variants,
         idl_product_code,
-        email,
         supplier_id,
         product_sku,
         product_id,
-        item,  
-        sub_category,   
-        naira_price,    
-        product_cost,   
-        currency,       
-        currency_adder, 
-        colour,        
-        exchange_rate,  
-        weight,        
+        sub_category,
+        naira_price,
+        product_cost,
+        currency,
+        currency_adder,
+        colour,
+        exchange_rate,
+        weight,
     } = product;
 
     const AddToCart = async () => {
+        if (!email) {
+            Swal.fire({
+                title: 'Email is missing',
+                icon: 'error',
+                toast: true,
+                timer: 6000,
+                position: 'top-right',
+                timerProgressBar: true,
+                showConfirmButton: false,
+            });
+            return;
+        }
+
         const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
         const url = `https://tencowry-api-staging.onrender.com/api/v1/ecommerce/cart/record/${email}`;
-    
-    
+
+
+
+        const {
+            product_rrp_naira: naira_price,
+            product_cost,
+            size,
+            colour,
+            weight,
+            product_sku,
+        } = product_variants[0];
+
         const payload = {
-          idl_product_code,
-          supplier_id: supplier_id,
-          product_sku: product_sku,
-          product_id,
-          product_name: item.product_name,
-          category,
-          sub_category,
-          main_picture,
-          quantity: 1, 
-          naira_price, 
-          product_cost, 
-          currency,
-          currency_adder,
-          colour,
-          exchange_rate,
-          weight,
+            idl_product_code,
+            supplier_id: supplier_id,
+            product_sku: product_sku,
+            product_id,
+            product_name,
+            category,
+            sub_category,
+            main_picture,
+            quantity: 1,
+            naira_price,
+            product_cost,
+            currency,
+            currency_adder,
+            colour,
+            exchange_rate,
+            weight,
         };
-    
-        // Check if the item is already in the cart
+
+        console.log('Payload:', payload);  // Log the payload to inspect its structure
+
         const itemInCart = cart.find(cartItem => cartItem.product_sku === product_sku);
         if (itemInCart) {
-          Swal.fire({
-            title: 'Item in cart already',
-            icon: 'warning',
-            toast: true,
-            timer: 6000,
-            position: 'top-right',
-            timerProgressBar: true,
-            showConfirmButton: false,
-          });
-          return;
+            Swal.fire({
+                title: 'Item already in cart',
+                icon: 'warning',
+                toast: true,
+                timer: 6000,
+                position: 'top-right',
+                timerProgressBar: true,
+                showConfirmButton: false,
+            });
+            return;
         }
-    
+
         try {
-          const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-access-token': apiKey
-            },
-            body: JSON.stringify(payload),
-          });
-    
-          if (!response.ok) {
-            const errorData = await response.json();
-            console.error('Error response:', errorData);
-            alert(`Error: ${errorData.message}`);
-            throw new Error('Failed to add item to cart');
-          }
-    
-          const data = await response.json();
-          Swal.fire({
-            title: 'Item added to cart',
-            icon: 'success',
-            toast: true,
-            timer: 6000,
-            position: 'top-right',
-            timerProgressBar: true,
-            showConfirmButton: false,
-          });
-          console.log('Item added to cart:', data);
-    
-          // Update local storage and context state
-          const newCart = [...cart, payload];
-          setCart(newCart);
-          localStorage.setItem('cart', JSON.stringify(newCart));
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-access-token': apiKey
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Error response:', errorData);
+                Swal.fire({
+                    title: `Error: ${errorData.message}`,
+                    icon: 'error',
+                    toast: true,
+                    timer: 6000,
+                    position: 'top-right',
+                    timerProgressBar: true,
+                    showConfirmButton: false,
+                });
+                throw new Error('Failed to add item to cart');
+            }
+
+            const data = await response.json();
+            Swal.fire({
+                title: 'Item added to cart',
+                icon: 'success',
+                toast: true,
+                timer: 6000,
+                position: 'top-right',
+                timerProgressBar: true,
+                showConfirmButton: false,
+            });
+
+            const newCart = [...cart, payload];
+            setCart(newCart);
+            localStorage.setItem('cart', JSON.stringify(newCart));
         } catch (error) {
-          console.error('Error adding item to cart:', error);
+            console.error('Error adding item to cart:', error);
+            Swal.fire({
+                title: 'Error adding item to cart',
+                icon: 'error',
+                toast: true,
+                timer: 6000,
+                position: 'top-right',
+                timerProgressBar: true,
+                showConfirmButton: false,
+            });
         }
-      };
+    };
+
 
     const handleIncrement = () => {
         if (product_variants && count < product_variants[0].stock_quantity) {
-          setCount(count + 1);
+            setCount(count + 1);
         }
-      };
-    
-      const handleDecrement = () => {
-        if (count > 0) {
-          setCount(count - 1);
+    };
+
+    const handleDecrement = () => {
+        if (count > 1) {
+            setCount(count - 1);
         }
-      };
+    };
 
     return (
-        <Dialog open={true} onClose={handleClosePopUp} PaperProps={{sx: { width: "100%", maxWidth: "80%!important",},}} >
-            <DialogTitle sx={{alignItems: 'end', display: 'flex', justifyContent: 'right'}}>
+        <Dialog open={true} onClose={handleClosePopUp} PaperProps={{ sx: { width: "100%", maxWidth: "80%!important", }, }}>
+            <DialogTitle sx={{ alignItems: 'end', display: 'flex', justifyContent: 'right' }}>
                 <IconButton onClick={handleClosePopUp}>
-                    <CancelOutlined  />
+                    <CancelOutlined />
                 </IconButton>
             </DialogTitle>
             <DialogContent>
                 <div className='grid lg:grid-cols-2 lg:p-12 p-4 mt-8 mb-16 gap-8'>
-                    <div className='px-4 border-2 border-gray-300 w-full p-2 flex flex-col items-center justify-center'>
+                    <div className='px-4  w-full p-2 flex flex-col items-center justify-center'>
                         <div className='h-full lg:w-[400px] relative item-card'>
                             {loading ? (
                                 <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '8px' }} height={300} width={300} />
@@ -151,7 +195,7 @@ const PopUp = ({ product, handleClosePopUp }) => {
                                         <RemoveRedEyeOutlinedIcon className='!text-white' />
                                         <p>Preview</p>
                                     </div>
-                                    <img src={main_picture} alt={product_name} className='h-full w-[400px] rounded object-cover' />
+                                    <img src={main_picture} alt={product_name} className='w-[400px] h-full rounded object-cover' />
                                 </>
                             )}
                         </div>
@@ -164,9 +208,9 @@ const PopUp = ({ product, handleClosePopUp }) => {
                                 <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '8px' }} height={60} width={60} />
                             </div>
                         ) : (
-                            <div className='flex items-center justify-center mt-4 gap-4'>
-                                {other_pictures && other_pictures.map((pic, index) => (
-                                    <img key={index} className='h-[60px] w-[60px] object-cover rounded hover:border border-[#ff5c40] cursor-pointer hover:scale-90 transition ease-in delay-150 hover:scale-100' src={pic} alt="" />
+                            <div className='flex items-center h-full justify-center mt-4 gap-4 w-full'>
+                                {other_pictures.slice(0, 4).map((pic, index) => (
+                                    <img key={index} className='h-[70px] w-[70px] object-cover rounded hover:border border-[#ff5c40] cursor-pointer hover:scale-90 transition ease-in delay-150 hover:scale-100' src={pic} alt="" />
                                 ))}
                             </div>
                         )}
@@ -194,9 +238,13 @@ const PopUp = ({ product, handleClosePopUp }) => {
                                     <>
                                         <p>Product Variants</p>
                                         <div className='flex items-center gap-3'>
-                                            <div className='rounded h-[30px] w-[30px] bg-black flex items-center justify-center cursor-not-allowed p-1'> <ArrowBackIosIcon className='!text-white !text-sm' /> </div>
+                                            <div className='rounded h-[30px] w-[30px] bg-black flex items-center justify-center cursor-not-allowed p-1'>
+                                                <ArrowBackIosIcon className='!text-white !text-sm' />
+                                            </div>
                                             <span className='text-[#ff5c40]'>1</span>
-                                            <div className='rounded h-[30px] w-[30px] bg-black flex items-center justify-center cursor-not-allowed p-1'> <ArrowForwardIosIcon className='!text-white !text-sm' /> </div>
+                                            <div className='rounded h-[30px] w-[30px] bg-black flex items-center justify-center cursor-not-allowed p-1'>
+                                                <ArrowForwardIosIcon className='!text-white !text-sm' />
+                                            </div>
                                         </div>
                                     </>
                                 )}
@@ -283,7 +331,7 @@ const PopUp = ({ product, handleClosePopUp }) => {
                             </div>
                         </div>
                         <div className='flex items-center gap-4 w-full p-8'>
-                            <Button variant="contained" color="primary" onClick={handleDecrement} disabled={count <= 0}>-</Button>
+                            <Button variant="contained" color="primary" onClick={handleDecrement} disabled={count <= 1}>-</Button>
                             <span>{count}</span>
                             <Button variant="contained" color="primary" onClick={handleIncrement} disabled={count >= product_variants[0].stock_quantity}>+</Button>
                         </div>

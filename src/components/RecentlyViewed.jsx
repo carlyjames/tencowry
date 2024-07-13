@@ -50,7 +50,7 @@ const RecentlyViewed = () => {
           className="mySwiper relative  mt-8 w-full p-4"
         >
           {TopDealsData.map((item) => (
-            <SwiperSlide className="swiperItem max:h-[400px] cursor-pointer rounded-lg shadow-lg mb-2 transition ease-in delay-150" key={item.id}>
+            <SwiperSlide key={item.product_id} className="swiperItem max:h-[400px] cursor-pointer rounded-lg shadow-lg mb-2 transition ease-in delay-150" key={item.id}>
               <Link to={`/item/${item.productCode}`} >
                 <img className="h-[200px] w-full object-cover rounded-t-lg" src={item.image} alt={item.name} />
                 <Favorite titleAccess="Add to Favorites" className="FavoriteIcon text-gray-400 text-sm absolute top-2 right-2 hover:text-black" />

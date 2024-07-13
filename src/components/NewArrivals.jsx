@@ -80,7 +80,7 @@ const NewArrivals = () => {
       </div>
 
       {/* swiper */}
-      <>
+      <div>
         <Swiper
           // slidesPerView={5}
           spaceBetween={20}
@@ -106,7 +106,7 @@ const NewArrivals = () => {
           className="mySwiper relative  mt-8 w-full p-4"
         >
           {deals.map((item) => (
-            <SwiperSlide className="swiperItem max:h-[400px] cursor-pointer rounded-lg shadow-lg mb-2 transition ease-in delay-150" key={item.id}>
+            <SwiperSlide key={item.product_id} className="swiperItem max:h-[400px] cursor-pointer rounded-lg shadow-lg mb-2 transition ease-in delay-150" key={item.id}>
               <Link to={`/product/detail/${item.idl_product_code}/${item.supplier_id}`}>
                 <img className="h-[200px] w-full object-cover rounded-t-lg" src={item.main_picture} alt={item.product_name} />
                 <Favorite titleAccess="Add to Favorites" className="FavoriteIcon text-gray-400 text-sm absolute top-2 right-2 hover:text-black" />
@@ -128,7 +128,7 @@ const NewArrivals = () => {
             </SwiperSlide>
           ))}
         </Swiper>
-      </>
+      </div>
 
 
 

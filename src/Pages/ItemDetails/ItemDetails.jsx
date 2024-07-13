@@ -180,6 +180,9 @@ const ItemDetails = () => {
     }
   };
 
+  console.log(item && item.product_variants[0].color );
+  console.log(item );
+
   return (
     <div className='grid lg:grid-cols-2 lg:p-12 p-4 mt-8 mb-16 gap-8'>
       <div className='px-4 border-2 border-gray-300 w-full p-2 flex flex-col items-center justify-center'>
@@ -205,7 +208,7 @@ const ItemDetails = () => {
             <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '8px' }} height={60} width={60} />
           </div>
         ) : (
-          <div className='flex items-center justify-center mt-4 gap-4'>
+          <div className='flex items-center justify-center mt-4 gap-4 w-full overflow-x-scroll'>
             {item.other_pictures && item.other_pictures.map((pic, index) => (
               <img key={index} className='h-[60px] w-[60px] object-cover rounded hover:border border-[#ff5c40] cursor-pointer hover:scale-90 transition ease-in delay-150 hover:scale-100' src={pic} alt="" />
             ))}
@@ -248,7 +251,7 @@ const ItemDetails = () => {
             ) : (
               <>
                 <h1>Colour :</h1>
-                <h1 className='text-gray-400'>{item.product_variants[0].colour}</h1>
+                <h1 className='text-gray-400'>{item.product_variants[0].color}</h1>
               </>
             )}
           </div>
@@ -288,7 +291,7 @@ const ItemDetails = () => {
             ) : (
               <>
                 <h1>Description :</h1>
-                <h1 className='text-gray-400'>{item.product_variants[0].description}</h1>
+                <h1 className='text-gray-400'>{item.description}</h1>
               </>
             )}
           </div>
@@ -298,7 +301,7 @@ const ItemDetails = () => {
             ) : (
               <>
                 <h1>Made in :</h1>
-                <h1 className='text-gray-400'>{item.product_variants[0].made_in}</h1>
+                <h1 className='text-gray-400'>{item.made_in}</h1>
               </>
             )}
           </div>
@@ -308,7 +311,7 @@ const ItemDetails = () => {
             ) : (
               <>
                 <h1>Material :</h1>
-                <h1 className='text-gray-400'>{item.product_variants[0].material}</h1>
+                <h1 className='text-gray-400'>{item.material}</h1>
               </>
             )}
           </div>
@@ -335,7 +338,7 @@ const ItemDetails = () => {
     </div>
   );
 };
-
+  
 // CartProvider component to wrap the application and provide cart context
 const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);

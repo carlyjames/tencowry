@@ -21,7 +21,7 @@ import "swiper/css/pagination";
 import { Pagination, Navigation, Autoplay } from "swiper/modules";
 
 // Placeholder image
-import placeholderImage from '../Assets/images/home-placeholder.jpeg'
+import placeholderImage from '../Assets/images/home-placeholder.jpeg';
 
 const TopDeals = () => {
   const [loading, setLoading] = useState(true);
@@ -29,7 +29,6 @@ const TopDeals = () => {
   const [error, setError] = useState(null);
   const [popUpOpen, setPopUpOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
-
 
   useEffect(() => {
     const fetchDeals = async () => {
@@ -93,7 +92,7 @@ const TopDeals = () => {
       </div>
 
       {/* swiper */}
-      <>
+      <div>
         <Swiper
           spaceBetween={20}
           loop={true}
@@ -115,12 +114,12 @@ const TopDeals = () => {
           className="mySwiper relative mt-2 w-full p-4 px-4"
         >
           {deals.map((item) => (
-            <SwiperSlide className="swiperItem relative max:h-[400px] cursor-pointer rounded-lg shadow-lg mb-2 transition ease-in delay-150" key={item.id}>
+            <SwiperSlide key={item.product_id} className="swiperItem relative max:h-[400px] cursor-pointer rounded-lg shadow-lg mb-2 transition ease-in delay-150" key={item.id}>
               <Link key={item.product_id} to={`/product/detail/${item.idl_product_code}/${item.supplier_id}`}>
-                <img
+              <img
                   className="h-[200px] w-full object-cover rounded-t-lg"
-                  src={item.main_picture ? item.main_picture : placeholderImage}
-                  alt={item.product_name}
+                  src={item.main_picture && item.main_picture.trim() ? item.main_picture : placeholderImage}
+                  alt={item.product_name || 'No image available'}
                 />
               </Link>
               <Favorite titleAccess="Add to Favorites" className="FavoriteIcon text-gray-400 text-sm absolute top-2 right-2 hover:text-black" />
@@ -154,7 +153,7 @@ const TopDeals = () => {
             </div>
           </div>
         </Swiper>
-      </>
+      </div>
 
       {/* AD */}
       <div className="mt-12 w-full flex lg:flex-row flex-col items-center justify-center lg:gap-8 gap-4">
@@ -169,7 +168,7 @@ const TopDeals = () => {
         />
       )}
     </div>
-  )
+  );
 }
 
 export default TopDeals;

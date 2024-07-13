@@ -98,7 +98,7 @@ const PopularProducts = () => {
       </div>
 
       {/* swiper */}
-      <>
+      <div>
         <Swiper
           // slidesPerView={5}
           spaceBetween={20}
@@ -121,7 +121,7 @@ const PopularProducts = () => {
           className="mySwiper relative  mt-2 w-full p-4"
         >
           {deals.map((item) => (
-            <SwiperSlide className="swiperItem relative max:h-[400px] cursor-pointer rounded-lg shadow-lg mb-2 transition ease-in delay-150" key={item.id}>
+            <SwiperSlide key={item.product_id} className="swiperItem relative max:h-[400px] cursor-pointer rounded-lg shadow-lg mb-2 transition ease-in delay-150" key={item.id}>
               <Link key={item.product_id} to={`/product/detail/${item.idl_product_code}/${item.supplier_id}`}>
                 <img className="h-[200px] w-full object-cover rounded-t-lg" src={item.main_picture} alt={item.product_name} />
               </Link>
@@ -157,7 +157,7 @@ const PopularProducts = () => {
           </div>
 
         </Swiper>
-      </>
+      </div>
 
       {/* AD */}
       <img src={ad3} className="cursor-pointer w-full mt-12 object-cover " alt="top collection" />
