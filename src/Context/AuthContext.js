@@ -46,7 +46,6 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
   
       if (response.ok && data.status) { 
-        console.log('Logged In');
         setAuthTokens(data);
   
         try {
@@ -78,8 +77,6 @@ export const AuthProvider = ({ children }) => {
         }
   
       } else {
-        console.log('Failed Login Attempt', response.status);
-        console.log('Server responded with:', data);
         Swal.fire({
           title: 'Email or password incorrect',
           icon: 'error',
@@ -108,9 +105,6 @@ export const AuthProvider = ({ children }) => {
     const { first_name, last_name, phone, email, password } = userData;
     const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
     const url = 'https://tencowry-api-staging.onrender.com/api/v1/ecommerce/signup/customer';
-
-    console.log('Sending request with data:', userData); 
-
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -128,8 +122,6 @@ export const AuthProvider = ({ children }) => {
       });
 
       const data = await response.json();
-      console.log('Response:', data); 
-
       if (response.ok) {
         Swal.fire({
           title: 'Registration Successful',
@@ -171,8 +163,6 @@ export const AuthProvider = ({ children }) => {
     const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
     const url = 'https://tencowry-api-staging.onrender.com/api/v1/ecommerce/seller/prospective';
 
-    console.log('Sending request with data:', userData); 
-
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -183,8 +173,6 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({full_name, address_1, city, state, country, phone, email, brand_name}),});
 
       const data = await response.json();
-      console.log('Response:', data); 
-
       if (response.ok) {
         Swal.fire({
           title: 'Seller details has been captured',
@@ -221,6 +209,61 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  const UpdatePassword = async (userData) => {
+    const { email, old_password, new_password } = userData;
+
+    const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
+    const url = 'https://tencowry-api-staging.onrender.com/api/v1/ecommerce/update_password';
+
+    try {
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': apiKey,
+        },
+        body: JSON.stringify({ email, old_password, new_password }),});
+
+      const data = await response.json();
+      console.log('Response:', data); 
+
+      if (response.ok) {
+        Swal.fire({
+          title: 'Password Changed Successfully',
+          icon: 'success',
+          toast: true,
+          timer: 6000,
+          position: 'top-right',
+          timerProgressBar: true,
+          showConfirmButton: false,
+        });
+      } else {
+        console.error('Password change failed:', response.status, data);
+        Swal.fire({
+          title: '' + (data.message || response.status),
+          icon: 'error',
+          toast: true,
+          timer: 6000,
+          position: 'top-right',
+          timerProgressBar: true,
+          showConfirmButton: false,
+        });
+      }
+    } catch (error) {
+      console.error('An error occurred during password reset:', error);
+      Swal.fire({
+        title: 'An Error Occurred',
+        icon: 'error',
+        toast: true,
+        timer: 6000,
+        position: 'top-right',
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+ 
+  }
+
   const logoutUser = () => {
     setAuthTokens(null);
     setUser(null);
@@ -245,6 +288,7 @@ export const AuthProvider = ({ children }) => {
     loginUser,
     logoutUser,
     registerSeller,
+    UpdatePassword,
   };
 
   useEffect(() => {

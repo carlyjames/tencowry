@@ -232,7 +232,21 @@ input:focus{
   text-transform: capitalize !important;
   font-size: 12px !important;
 }
+.tab-button-2{
+  border-bottom: 2px solid !important;
+  background: none !important;
+  /* margin-left: 8px !important; */
+  /* color: black !important; */
+  text-transform: capitalize !important;
+  font-size: 12px !important;
+}
 
+
+.tab-button:hover{
+  color: gray !important;
+  transition: all .3s ease-in-out;
+  transition-delay: .3s;
+}
 
 .tab-button:hover{
   background: var(--primary-color) !important;
@@ -281,4 +295,11 @@ input:focus{
 .cart-btn:hover{
   background: #22c55ebe !important;
   /* background-color: #00000078; */
+}
+
+.z-index-0{
+  z-index: 0px !important;
+}
+.z-index{
+  z-index: 999px !important;
 }

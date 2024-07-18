@@ -94,17 +94,17 @@ const PopularProductsComponent = () => {
     setValue(newValue);
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  // if (loading) {
+  //   return <div>Loading...</div>;
+  // }
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
+  // if (error) {
+  //   return <div>Error: {error}</div>;
+  // }
 
-  if (!Array.isArray(deals)) {
-    return <div>Error: Invalid data format</div>;
-  }
+  // if (!Array.isArray(deals)) {
+  //   return <div>Error: Invalid data format</div>;
+  // }
 
   return (
     <div className='bg-[#f2f2f2] py-8 flex flex-col gap-4'>
@@ -119,92 +119,107 @@ const PopularProductsComponent = () => {
         </Tabs>
       </div>
 
-      <CustomTabPanel value={value} index={0}>
-        <section className='grid lg:grid-cols-3 2xl:grid-cols-4 w-full gap-4 lg:px-32'>
-          {loading ? (
-            deals.map((data) => (
-              <div key={data.product_id} className='rounded-[20px] h-[400px] lg:w-full w-[300px] mt-4'>
-                <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '20px 20px 0 0' }} height={200} />
-                <div className="bg-white p-6 flex flex-col gap-2 rounded-b-lg">
-                  <Skeleton animation='wave' height={40} width={200} variant='text' />
-                  <div className="flex items-center justify-between font-bold text-sm">
-                    <Skeleton animation='wave' height={10} width={100} variant='text' />
-                    <Skeleton animation='wave' height={10} width={100} variant='text' />
-                    <Skeleton animation='wave' height={10} width={100} variant='text' />
-                  </div>
-                  <div className="w-full flex cursor-pointer items-center justify-end">
-                    <Skeleton animation='wave' height={40} width={40} variant='rectangle' />
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            deals.map((item) => (
-              <Link key={item.product_id} to={`/product/detail/${item.idl_product_code}/${item.supplier_id}`}>
-                <div className='rounded-[20px] h-[400px] lg:w-full w-[300px] mt-4'>
-                  <img className="h-[200px] w-full object-cover rounded-t-lg" src={item.main_picture} alt={item.product_name} />
-                  <Favorite titleAccess="Add to Favorites" className="FavoriteIcon text-gray-400 text-sm absolute top-2 right-2 hover:text-black" />
-                  <div className="bg-white p-6 flex flex-col gap-2 rounded-b-lg">
-                    <h1 className="text-gray-500 font-bold text-sm line-clamp-1">{item.product_name}</h1>
-                    <div className="flex items-center justify-between font-bold text-sm">
-                      <p className="text-gray-500 line-through">₦{item.product_variants.length > 0 && item.product_variants[0].naira_price}</p>
-                      <p className="text-green-400">₦{item.product_variants.length > 0 && item.product_variants[0].product_rrp_naira}</p>
-                      <p className="text-red-400">₦{item.product_variants.length > 0 && item.product_variants[0].product_discount}</p>
-                    </div>
-                    <div className="w-full flex cursor-pointer items-center justify-end">
-                      <Button className='!text-white !w-full !bg-green-500 !normal-case'>Add To Cart</Button>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ))
-          )}
-        </section>
-      </CustomTabPanel>
-
-      {/* Repeat CustomTabPanel for other categories with different index values */}
-      <CustomTabPanel value={value} index={1}>
-        <div className='grid lg:grid-cols-4 2xl:grid-cols-5 w-full gap-4'>
-          {loading ? (
-            deals.map((data) => (
-              <div key={data.id} className='rounded-[20px] h-[400px] lg:w-full w-[300px] mt-4'>
-                <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '20px 20px 0 0' }} height={200} />
-                <div className="bg-white p-6 flex flex-col gap-2 rounded-b-lg">
-                  <Skeleton animation='wave' height={40} width={200} variant='text' />
-                  <div className="flex items-center justify-between font-bold text-sm">
-                    <Skeleton animation='wave' height={10} width={100} variant='text' />
-                    <Skeleton animation='wave' height={10} width={100} variant='text' />
-                    <Skeleton animation='wave' height={10} width={100} variant='text' />
-                  </div>
-                  <div className="w-full flex cursor-pointer items-center justify-end">
-                    <Skeleton animation='wave' height={40} width={40} variant='rectangle' />
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            deals.map((item) => (
-              <Link key={item.product_id} to={`/product/detail/${item.idl_product_code}/${item.supplier_id}`}>
-                <div className='rounded-[20px] h-[400px] lg:w-full w-[300px] mt-4'>
-                  <img className="h-[200px] w-full object-cover rounded-t-lg" src={item.main_picture} alt={item.product_name} />
-                  <Favorite titleAccess="Add to Favorites" className="FavoriteIcon text-gray-400 text-sm absolute top-2 right-2 hover:text-black" />
-                  <div className="bg-white p-6 flex flex-col gap-2 rounded-b-lg">
-                    <h1 className="text-gray-500 font-bold text-sm line-clamp-1">{item.product_name}</h1>
-                    <div className="flex items-center justify-between font-bold text-sm">
-                      <p className="text-gray-500 line-through">₦{item.product_variants.length > 0 && item.product_variants[0].naira_price}</p>
-                      <p className="text-green-400">₦{item.product_variants.length > 0 && item.product_variants[0].product_rrp_naira}</p>
-                      <p className="text-red-400">₦{item.product_variants.length > 0 && item.product_variants[0].product_discount}</p>
-                    </div>
-                    <div className="w-full flex cursor-pointer items-center justify-end">
-                      <Button className='!text-white !w-full !bg-green-500 !normal-case'>Add To Cart</Button>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ))
-          )}
+      {loading || error ? (
+        <div className="grid lg:grid-cols-4 m-4 gap-4">
+          <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '8px' }} height={300} width={280} />
+          <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '8px' }} height={300} width={280} />
+          <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '8px' }} height={300} width={280} />
+          <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '8px' }} height={300} width={280} />
+          <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '8px' }} height={300} width={280} />
+          <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '8px' }} height={300} width={280} />
+          <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '8px' }} height={300} width={280} />
+          <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '8px' }} height={300} width={280} />
         </div>
-      </CustomTabPanel>
+      ) : (
+        <>
+          <CustomTabPanel value={value} index={0}>
+            <section className='grid lg:grid-cols-3 2xl:grid-cols-4 w-full gap-4 lg:px-32'>
+              {loading ? (
+                deals.map((data) => (
+                  <div key={data.product_id} className='rounded-[20px] h-[400px] lg:w-full w-[300px] mt-4'>
+                    <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '20px 20px 0 0' }} height={200} />
+                    <div className="bg-white p-6 flex flex-col gap-2 rounded-b-lg">
+                      <Skeleton animation='wave' height={40} width={200} variant='text' />
+                      <div className="flex items-center justify-between font-bold text-sm">
+                        <Skeleton animation='wave' height={10} width={100} variant='text' />
+                        <Skeleton animation='wave' height={10} width={100} variant='text' />
+                        <Skeleton animation='wave' height={10} width={100} variant='text' />
+                      </div>
+                      <div className="w-full flex cursor-pointer items-center justify-end">
+                        <Skeleton animation='wave' height={40} width={40} variant='rectangle' />
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                deals.map((item) => (
+                  <Link key={item.product_id} to={`/product/detail/${item.idl_product_code}/${item.supplier_id}`}>
+                    <div className='rounded-[20px] h-[400px] lg:w-full w-[300px] mt-4'>
+                      <img className="h-[200px] w-full object-cover rounded-t-lg" src={item.main_picture} alt={item.product_name} />
+                      <Favorite titleAccess="Add to Favorites" className="FavoriteIcon text-gray-400 text-sm absolute top-2 right-2 hover:text-black" />
+                      <div className="bg-white p-6 flex flex-col gap-2 rounded-b-lg">
+                        <h1 className="text-gray-500 font-bold text-sm line-clamp-1">{item.product_name}</h1>
+                        <div className="flex items-center justify-between font-bold text-sm">
+                          <p className="text-gray-500 line-through">₦{item.product_variants.length > 0 && item.product_variants[0].naira_price}</p>
+                          <p className="text-green-400">₦{item.product_variants.length > 0 && item.product_variants[0].product_rrp_naira}</p>
+                          <p className="text-red-400">₦{item.product_variants.length > 0 && item.product_variants[0].product_discount}</p>
+                        </div>
+                        <div className="w-full flex cursor-pointer items-center justify-end">
+                          <Button className='!text-white !w-full !bg-green-500 !normal-case'>Add To Cart</Button>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))
+              )}
+            </section>
+          </CustomTabPanel>
+
+          <CustomTabPanel value={value} index={1}>
+            <div className='grid lg:grid-cols-4 2xl:grid-cols-5 w-full gap-4'>
+              {loading ? (
+                deals.map((data) => (
+                  <div key={data.id} className='rounded-[20px] h-[400px] lg:w-full w-[300px] mt-4'>
+                    <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '20px 20px 0 0' }} height={200} />
+                    <div className="bg-white p-6 flex flex-col gap-2 rounded-b-lg">
+                      <Skeleton animation='wave' height={40} width={200} variant='text' />
+                      <div className="flex items-center justify-between font-bold text-sm">
+                        <Skeleton animation='wave' height={10} width={100} variant='text' />
+                        <Skeleton animation='wave' height={10} width={100} variant='text' />
+                        <Skeleton animation='wave' height={10} width={100} variant='text' />
+                      </div>
+                      <div className="w-full flex cursor-pointer items-center justify-end">
+                        <Skeleton animation='wave' height={40} width={40} variant='rectangle' />
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                deals.map((item) => (
+                  <Link key={item.product_id} to={`/product/detail/${item.idl_product_code}/${item.supplier_id}`}>
+                    <div className='rounded-[20px] h-[400px] lg:w-full w-[300px] mt-4'>
+                      <img className="h-[200px] w-full object-cover rounded-t-lg" src={item.main_picture} alt={item.product_name} />
+                      <Favorite titleAccess="Add to Favorites" className="FavoriteIcon text-gray-400 text-sm absolute top-2 right-2 hover:text-black" />
+                      <div className="bg-white p-6 flex flex-col gap-2 rounded-b-lg">
+                        <h1 className="text-gray-500 font-bold text-sm line-clamp-1">{item.product_name}</h1>
+                        <div className="flex items-center justify-between font-bold text-sm">
+                          <p className="text-gray-500 line-through">₦{item.product_variants.length > 0 && item.product_variants[0].naira_price}</p>
+                          <p className="text-green-400">₦{item.product_variants.length > 0 && item.product_variants[0].product_rrp_naira}</p>
+                          <p className="text-red-400">₦{item.product_variants.length > 0 && item.product_variants[0].product_discount}</p>
+                        </div>
+                        <div className="w-full flex cursor-pointer items-center justify-end">
+                          <Button className='!text-white !w-full !bg-green-500 !normal-case'>Add To Cart</Button>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))
+              )}
+            </div>
+          </CustomTabPanel>
+        </>
+      )}
+
 
       {/* Add more CustomTabPanel components for other categories */}
     </div>

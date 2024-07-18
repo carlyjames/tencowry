@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Link } from 'react-router-dom';
 import { useState, useContext } from 'react';
 import NavItems from './Data/NavItems';
 import RegisterSeller from './RegisterSeller';
@@ -12,20 +13,17 @@ import { Badge, Button, IconButton, MenuItem } from '@mui/material'
 import { ArrowDropDown, Search } from '@mui/icons-material'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import MenuIcon from '@mui/icons-material/Menu';
-import PropTypes from 'prop-types';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
-import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
 import CloseIcon from '@mui/icons-material/Close';
-import { Link } from 'react-router-dom';
-
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import AuthContext from '../Context/AuthContext';
 
 const drawerWidth = '100%';
 // const NavItems = ['Top Deals', 'Popular Products', 'New Arrivals', 'Gift Card'];
@@ -36,24 +34,31 @@ const Navbar = (props) => {
   const [open, setOpen] = useState(true)
   const [mobileOpen, setMobileOpen] = useState(false);
   const [seller, setSeller] = useState(false);
+  const [menu, setMenu] = useState(true);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { cart } = useContext(CartContext);
+  const { logoutUser } = useContext(AuthContext)
   const cartItemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
   const token = localStorage.getItem("authTokens");
+  const [state, setState] = useState({
+    email: '',
+  });
   let email = '';
+  let first_name = '';
 
   if (token) {
     try {
       const parsedToken = JSON.parse(token);
       email = parsedToken.data.email;
+      first_name = parsedToken.data.first_name;
     } catch (error) {
       console.error("Error parsing token:", error.message);
     }
   }
-  console.log(token); 
+  // console.log(token); 
 
   const handleDrawerToggle = () => {
     setMobileOpen((prevState) => !prevState);
@@ -61,6 +66,9 @@ const Navbar = (props) => {
 
   const toggleDropdown = () => {
     setOpen((prevState) => !prevState);
+  };
+  const toggleMenu = () => {
+    setMenu((prevState) => !prevState);
   };
 
   const toggleSeller = () => {
@@ -108,7 +116,7 @@ const Navbar = (props) => {
         },
         body: JSON.stringify({ query })
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch data');
       }
@@ -116,6 +124,16 @@ const Navbar = (props) => {
       setResults(data.data || []);
     } catch (error) {
       setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await logoutUser(state);
     } finally {
       setLoading(false);
     }
@@ -129,10 +147,10 @@ const Navbar = (props) => {
       {/* first layer */}
       <div className='flex lg:px-6 px-4 lg:pt-2 items-center justify-between w-full '>
         <div className='flex items-center gap-2 '>
-          <p className='font-extra'>Welcome to TenCowry! </p>
+          <p className='font-extra text-xl'>Hello, {first_name ? first_name : 'Welcome'}! </p>
           {email ? (
             <div className='flex items-center gap-1'>
-              <Link className='text-[#ff5c40]' to='/login' >Logout </Link>
+              <Link className='text-[#ff5c40]' onClick={handleLogout} >Logout </Link>
             </div>
           ) : (
             <div className='flex items-center gap-1'>
@@ -174,8 +192,31 @@ const Navbar = (props) => {
           ))}
         </div> */}
         {/* cart */}
-        <div className=' flex items-center justify-end'>
-          <Link to='/Cart'>          
+        <div className=' flex items-center justify-end '>
+          {email && (
+            <div className='flex flex-col relative z-40'>
+              <IconButton onClick={toggleMenu}>
+                <AccountCircleIcon sx={{ color: 'white' }} />
+              </IconButton>
+              <List sx={{ width: '140px', position: 'absolute' }} className={`z-index absolute left-[-50px] top-[50px] bg-white text-black z-40 rounded-md ${menu ? `hidden` : `block`}`}>
+                <ListItem disablePadding className='flex flex-col justify-around w-full'>
+                  <ListItemButton sx={{ textAlign: 'center', justifyItems: 'center', display: 'flex', width: '100%', marginTop: '6px' }}>
+                    <Link to={'/my-account'}>My Account</Link>
+                  </ListItemButton>
+                  <ListItemButton sx={{ textAlign: 'center', justifyItems: 'center', display: 'flex', width: '100%', marginTop: '6px' }}>
+                    <Link to={'/my-orders'}>Orders</Link>
+                  </ListItemButton>
+                  <ListItemButton sx={{ textAlign: 'center', justifyItems: 'center', display: 'flex', width: '100%', marginTop: '6px' }}>
+                    <Link to={'/my-favorites'}>Favourites</Link>
+                  </ListItemButton>
+                  <ListItemButton sx={{ textAlign: 'center', justifyItems: 'center', display: 'flex', width: '100%', marginTop: '6px' }}>
+                    Help
+                  </ListItemButton>
+                </ListItem>
+              </List>
+            </div>
+          )}
+          <Link to='/Cart'>
             <IconButton>
               <Badge badgeContent={cartItemCount} color="error">
                 <ShoppingCartIcon sx={{ color: 'white' }} />
@@ -186,9 +227,9 @@ const Navbar = (props) => {
       </div>
 
       {/* third layer */}
-      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', height: '50px' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', height: '50px', zIndex: '0' }}>
         <CssBaseline />
-        <AppBar className='w-full px-2' sx={{ position: 'relative', background: 'none', boxShadow: 'none', width: '100%' }} component="nav">
+        <AppBar className='w-full px-2 z-0' sx={{ position: 'relative', background: 'none', boxShadow: 'none', width: '100%' }} component="nav">
           <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <IconButton className='drawer-open-btn' color="inherit" aria-label="open drawer" edge="start" onClick={handleDrawerToggle} sx={{ mr: 2, display: { sm: 'none' }, background: 'white' }}>
               <MenuIcon sx={{ color: 'black' }} />
@@ -213,9 +254,9 @@ const Navbar = (props) => {
                 </List>
               </div>
             </div>
-            <Box className="gap-6 text-gray-300" sx={{ display: { xs: 'none', sm: 'flex' } }}>
+            <Box className="gap-6 text-gray-300 z-index-0" sx={{ display: { xs: 'none', sm: 'flex' } }}>
               {NavItems.map((item) => (
-                <Link className='nav-item' to={item.link} key={item.id}>{item.name}</Link>
+                <Link className='nav-item z-0' to={item.link} key={item.id}>{item.name}</Link>
               ))}
             </Box>
           </Toolbar>

@@ -48,23 +48,6 @@ const PopUp = ({ product, handleClosePopUp }) => {
     } = product;
 
     const AddToCart = async () => {
-        if (!email) {
-            Swal.fire({
-                title: 'Email is missing',
-                icon: 'error',
-                toast: true,
-                timer: 6000,
-                position: 'top-right',
-                timerProgressBar: true,
-                showConfirmButton: false,
-            });
-            return;
-        }
-
-        const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
-        const url = `https://tencowry-api-staging.onrender.com/api/v1/ecommerce/cart/record/${email}`;
-
-
 
         const {
             product_rrp_naira: naira_price,
@@ -110,57 +93,30 @@ const PopUp = ({ product, handleClosePopUp }) => {
             return;
         }
 
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-access-token': apiKey
-                },
-                body: JSON.stringify(payload),
-            });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                console.error('Error response:', errorData);
-                Swal.fire({
-                    title: `Error: ${errorData.message}`,
-                    icon: 'error',
-                    toast: true,
-                    timer: 6000,
-                    position: 'top-right',
-                    timerProgressBar: true,
-                    showConfirmButton: false,
-                });
-                throw new Error('Failed to add item to cart');
-            }
 
-            const data = await response.json();
-            Swal.fire({
-                title: 'Item added to cart',
-                icon: 'success',
-                toast: true,
-                timer: 6000,
-                position: 'top-right',
-                timerProgressBar: true,
-                showConfirmButton: false,
-            });
-
+        if(itemInCart){
+            const updatedCart = cart.map(cartItem =>
+                cartItem.product_sku === product_sku
+                ? {...cartItem, quantity: cartItem.quantity + count}
+                : cartItem
+            );
+            setCart(updatedCart);
+            localStorage.setItem('cart', JSON.stringify(updatedCart));
+        }else{
             const newCart = [...cart, payload];
             setCart(newCart);
-            localStorage.setItem('cart', JSON.stringify(newCart));
-        } catch (error) {
-            console.error('Error adding item to cart:', error);
-            Swal.fire({
-                title: 'Error adding item to cart',
-                icon: 'error',
-                toast: true,
-                timer: 6000,
-                position: 'top-right',
-                timerProgressBar: true,
-                showConfirmButton: false,
-            });
+            localStorage.setItem('cart', JSON.stringify(newCart))
         }
+        Swal.fire({
+            title: 'Item added to cart',
+            icon: 'success',
+            toast: true,
+            timer: 6000,
+            position: 'top-right',
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
     };
 
 
@@ -226,7 +182,7 @@ const PopUp = ({ product, handleClosePopUp }) => {
                             ) : (
                                 <>
                                     <h1 className='lg:text-3xl text-2xl text-gray-400'>{category}</h1>
-                                    <p className='text-green-600 font-semibold text-2xl'>₦{product_variants[0].product_rrp_naira}</p>
+                                    <p className='text-green-600 font-semibold text-2xl'>₦{product_variants[0].naira_price}</p>
                                 </>
                             )}
                         </div>

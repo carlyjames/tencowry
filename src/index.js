@@ -10,7 +10,7 @@ import PrivateRoute from './Utils/PrivateRoute'
 import { CartProvider } from './Pages/ItemDetails/ItemDetails'
 
 // pages
-import { TopDeals, PopularProducts, NewArrivals, Item, Cart } from './Pages'
+import { TopDeals, PopularProducts, NewArrivals, Item, Cart, Profile, Orders, Favourites } from './Pages'
 
 import { render } from 'react-dom'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
@@ -27,6 +27,9 @@ render(
           <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Register />} />
           <Route path='/Cart' element={<Cart />} />
+          <Route path='/my-account' element={<Profile />} />
+          <Route path='/my-orders' element={<Orders />} />
+          <Route path='/my-favorites' element={<Favourites />} />
 
           {/* item details */}
           <Route path='/product/detail/:idl_product_code/:supplier_id' element={<Item />} />

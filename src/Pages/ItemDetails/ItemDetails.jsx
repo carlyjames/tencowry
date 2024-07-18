@@ -15,18 +15,7 @@ const ItemDetails = () => {
   const [item, setItem] = useState(null);
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(false);
-  const token = localStorage.getItem("authTokens");
   const { cart, setCart } = useContext(CartContext);
-  let email = '';
-
-  if (token) {
-    try {
-      const parsedToken = JSON.parse(token);
-      email = parsedToken.data.email;
-    } catch (error) {
-      console.error("Error parsing token:", error.message);
-    }
-  }
 
   useEffect(() => {
     const fetchItemDetails = async () => {
@@ -57,10 +46,7 @@ const ItemDetails = () => {
     fetchItemDetails();
   }, [idl_product_code, supplier_id]);
 
-  const AddToCart = async () => {
-    const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
-    const url = `https://tencowry-api-staging.onrender.com/api/v1/ecommerce/cart/record/${email}`;
-
+  const AddToCart = () => {
     if (!item || !item.product_variants || !item.product_variants[0]) {
       console.error('Item or product variants are missing');
       return;
@@ -95,9 +81,9 @@ const ItemDetails = () => {
       category,
       sub_category,
       main_picture,
-      quantity: 1, 
-      naira_price, 
-      product_cost, 
+      quantity: count, // Use the selected count
+      naira_price,
+      product_cost,
       currency,
       currency_adder,
       colour,
@@ -107,67 +93,34 @@ const ItemDetails = () => {
 
     // Check if the item is already in the cart
     const itemInCart = cart.find(cartItem => cartItem.product_sku === product_sku);
+
     if (itemInCart) {
-      Swal.fire({
-        title: 'Item in cart already',
-        icon: 'warning',
-        toast: true,
-        timer: 6000,
-        position: 'top-right',
-        timerProgressBar: true,
-        showConfirmButton: false,
-      });
-      return;
-    }
-
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-access-token': apiKey
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Error response:', errorData);
-        alert(`Error: ${errorData.message}`);
-        throw new Error('Failed to add item to cart');
-      }
-
-      const data = await response.json();
-      Swal.fire({
-        title: 'Item added to cart',
-        icon: 'success',
-        toast: true,
-        timer: 6000,
-        position: 'top-right',
-        timerProgressBar: true,
-        showConfirmButton: false,
-      });
-      console.log('Item added to cart:', data);
-
-      // Update local storage and context state
+      // If item is already in the cart, update its quantity
+      const updatedCart = cart.map(cartItem =>
+        cartItem.product_sku === product_sku
+          ? { ...cartItem, quantity: cartItem.quantity + count }
+          : cartItem
+      );
+      setCart(updatedCart);
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+    } else {
+      // Add new item to the cart
       const newCart = [...cart, payload];
       setCart(newCart);
       localStorage.setItem('cart', JSON.stringify(newCart));
-    } catch (error) {
-      console.error('Error adding item to cart:', error);
     }
+
+    Swal.fire({
+      title: 'Item added to cart',
+      icon: 'success',
+      toast: true,
+      timer: 6000,
+      position: 'top-right',
+      timerProgressBar: true,
+      showConfirmButton: false,
+    });
   };
 
-  useEffect(() => {
-    const storedCart = localStorage.getItem('cart');
-    if (storedCart) {
-      setCart(JSON.parse(storedCart));
-    }
-  }, []);
-
-  if (!item && !loading) {
-    return <div>Item not found</div>;
-  }
   const handleIncrement = () => {
     if (item && item.product_variants && count < item.product_variants[0].stock_quantity) {
       setCount(count + 1);
@@ -180,8 +133,9 @@ const ItemDetails = () => {
     }
   };
 
-  console.log(item && item.product_variants[0].color );
-  console.log(item );
+  if (!item && !loading) {
+    return <div>Item not found</div>;
+  }
 
   return (
     <div className='grid lg:grid-cols-2 lg:p-12 p-4 mt-8 mb-16 gap-8'>
@@ -208,9 +162,9 @@ const ItemDetails = () => {
             <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '8px' }} height={60} width={60} />
           </div>
         ) : (
-          <div className='flex items-center justify-center mt-4 gap-4 w-full overflow-x-scroll'>
-            {item.other_pictures && item.other_pictures.map((pic, index) => (
-              <img key={index} className='h-[60px] w-[60px] object-cover rounded hover:border border-[#ff5c40] cursor-pointer hover:scale-90 transition ease-in delay-150 hover:scale-100' src={pic} alt="" />
+          <div className='flex items-center h-full justify-center mt-4 gap-4 w-full'>
+            {item.other_pictures.slice(0, 4).map((pic, index) => (
+              <img key={index} className='h-[70px] w-[70px] object-cover rounded hover:border border-[#ff5c40] cursor-pointer hover:scale-90 transition ease-in delay-150 hover:scale-100' src={pic} alt="" />
             ))}
           </div>
         )}
@@ -226,7 +180,7 @@ const ItemDetails = () => {
           ) : (
             <>
               <h1 className='lg:text-3xl text-2xl text-gray-400'>{item.category}</h1>
-              <p className='text-green-600 font-semibold text-2xl'>₦{item.product_variants[0].product_rrp_naira}</p>
+              <p className='text-green-600 font-semibold text-2xl'>₦{item.product_variants[0].naira_price}</p>
             </>
           )}
         </div>
@@ -265,16 +219,7 @@ const ItemDetails = () => {
               </>
             )}
           </div>
-          <div className='flex items-center gap-4 font-semibold w-full'>
-            {loading ? (
-              <Skeleton variant='text' className='!w-1/3 !h-[30px]' />
-            ) : (
-              <>
-                <h1>Weight :</h1>
-                <h1 className='text-gray-400'>{item.product_variants[0].weight}</h1>
-              </>
-            )}
-          </div>
+
           <div className='flex items-center gap-4 font-semibold w-full'>
             {loading ? (
               <Skeleton variant='text' className='!w-1/3 !h-[30px]' />
@@ -285,33 +230,14 @@ const ItemDetails = () => {
               </>
             )}
           </div>
+
           <div className='flex items-center gap-4 font-semibold w-full'>
             {loading ? (
               <Skeleton variant='text' className='!w-1/3 !h-[30px]' />
             ) : (
               <>
-                <h1>Description :</h1>
-                <h1 className='text-gray-400'>{item.description}</h1>
-              </>
-            )}
-          </div>
-          <div className='flex items-center gap-4 font-semibold w-full'>
-            {loading ? (
-              <Skeleton variant='text' className='!w-1/3 !h-[30px]' />
-            ) : (
-              <>
-                <h1>Made in :</h1>
-                <h1 className='text-gray-400'>{item.made_in}</h1>
-              </>
-            )}
-          </div>
-          <div className='flex items-center gap-4 font-semibold w-full'>
-            {loading ? (
-              <Skeleton variant='text' className='!w-1/3 !h-[30px]' />
-            ) : (
-              <>
-                <h1>Material :</h1>
-                <h1 className='text-gray-400'>{item.material}</h1>
+                <h1>Product Code :</h1>
+                <h1 className='text-green-400'>{item.idl_product_code}</h1>
               </>
             )}
           </div>
@@ -327,18 +253,29 @@ const ItemDetails = () => {
           </div>
         </div>
         <div className='flex items-center gap-4 w-full p-8'>
-          <Button variant="contained" color="primary" onClick={handleDecrement} disabled={count <= 0}>-</Button>
+          <Button variant="contained" sx={{background: '#ff5c40'}} className='hover-none' color="primary" onClick={handleDecrement} disabled={count <= 0}>-</Button>
           <span>{count}</span>
-          <Button variant="contained" color="primary" onClick={handleIncrement} disabled={item && count >= item.product_variants[0].stock_quantity}>+</Button>
+          <Button variant="contained" sx={{background: '#ff5c40'}} className='hover-none' color="primary" onClick={handleIncrement} disabled={item && count >= item.product_variants[0].stock_quantity}>+</Button>
         </div>
-        <div className='flex items-center gap-4 w-full p-8'>
-          <Button variant="contained" color="primary" onClick={AddToCart} disabled={count === 0 || loading}>Add to Cart</Button>
+        <hr />
+        <div className='flex items-center gap-4 w-full mt-4'>
+            {loading ? (
+              <Skeleton variant='text' className='!w-1/3 !h-[30px]' />
+            ) : (
+              <>
+                <h1>Description :</h1>
+                <h1 className='font-semibold'>{item.description}</h1>
+              </>
+            )}
+          </div>
+        <div className='flex items-start gap-4 w-full py-8'>
+          <Button variant="contained" color="primary" onClick={AddToCart} sx={{background: '#ff5c40'}} className='hover-none lg:w-[70%]' disabled={count === 0 || loading}>Add to Cart</Button>
         </div>
       </div>
     </div>
   );
 };
-  
+
 // CartProvider component to wrap the application and provide cart context
 const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);

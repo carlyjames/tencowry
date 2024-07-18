@@ -13,81 +13,51 @@ import cartIcon from '../../Assets/images/vecteezy_shopping-cart-icon-on-a-white
 
 const Cart = () => {
     const { cart, setCart } = useContext(CartContext);
-    const [count, setCount] = useState(0);
     const [deletedItem, setDeletedItem] = useState(null);
-    const token = localStorage.getItem("authTokens");
-    let email = '';
-
-    if (token) {
-        try {
-            const parsedToken = JSON.parse(token);
-            email = parsedToken.data.email;
-        } catch (error) {
-            console.error("Error parsing token:", error.message);
-        }
-    }
 
     const toggleDelete = (item) => {
         setDeletedItem(item);
     };
 
-    const deleteItemFromCart = async (item) => {
-        const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
+    const deleteItemFromCart = (item) => {
+        Swal.fire({
+            title: 'Item deleted from cart',
+            icon: 'success',
+            toast: true,
+            timer: 6000,
+            position: 'top-right',
+            timerProgressBar: true,
+            showConfirmButton: false,
+        });
 
-        const url = `https://tencowry-api-staging.onrender.com/api/v1/ecommerce/cart/record/${email}`;
-        const payload = {
-            product_sku: item.product_sku,
-        };
+        // Update local storage and context state
+        const updatedCart = cart.filter((cartItem) => cartItem.product_sku !== item.product_sku);
+        setCart(updatedCart);
+        localStorage.setItem('cart', JSON.stringify(updatedCart));
+        setDeletedItem(null);
+    };
 
-        try {
-            const response = await fetch(url, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-access-token': apiKey,
-                },
-                body: JSON.stringify(payload),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                console.error('Error response:', errorData);
-                alert(`Error: ${errorData.message}`);
-                throw new Error('Failed to delete item from cart');
-            }
-
-            Swal.fire({
-                title: 'Item deleted from cart',
-                icon: 'success',
-                toast: true,
-                timer: 6000,
-                position: 'top-right',
-                timerProgressBar: true,
-                showConfirmButton: false,
-            });
-
-            // Update local storage and context state
-            const updatedCart = cart.filter((cartItem) => cartItem.product_sku !== item.product_sku);
+    const handleIncrement = (item) => {
+        if (item && item.product_variants && item.quantity ) {
+            const updatedCart = cart.map(cartItem =>
+                cartItem.product_sku === item.product_sku
+                    ? { ...cartItem, quantity: cartItem.quantity + 1 }
+                    : cartItem
+            );
             setCart(updatedCart);
             localStorage.setItem('cart', JSON.stringify(updatedCart));
-        } catch (error) {
-            console.error('Error deleting item from cart:', error);
-        } finally {
-            setDeletedItem(null);
         }
     };
 
-    console.log(cart[0]);
-
-    const handleIncrement = () => {
-        if (cart && cart.length > 0 && cart[0].product_variants && count < cart[0].product_variants[0].stock_quantity) {
-            setCount(count + 1);
-        }
-    };
-
-    const handleDecrement = () => {
-        if (count > 0) {
-            setCount(count - 1);
+    const handleDecrement = (item) => {
+        if (item.quantity > 1) {
+            const updatedCart = cart.map(cartItem =>
+                cartItem.product_sku === item.product_sku
+                    ? { ...cartItem, quantity: cartItem.quantity - 1 }
+                    : cartItem
+            );
+            setCart(updatedCart);
+            localStorage.setItem('cart', JSON.stringify(updatedCart));
         }
     };
 
@@ -122,7 +92,7 @@ const Cart = () => {
                             <div className='lg:w-2/3  flex flex-col '>
                                 {cart.map((item) => (
                                     <div
-                                        key={item.product_key}
+                                        key={item.product_sku}
                                         className='w-full bg-white text-sm shadow-xl gap-2 h-max lg:h-[200px] mb-8 rounded-md p-6 flex flex-col items-start justify-between'
                                     >
                                         <div className='w-full flex lg:flex-row md:flex-col flex-col justify-between items-start gap-4 lg:gap-8'>
@@ -134,18 +104,18 @@ const Cart = () => {
                                             {/* product details */}
                                             <div className='flex flex-col gap-3 items-start'>
                                                 <h1 className='text-gray-500'>{item.product_name}</h1>
-                                                    <>
-                                                        <div className='flex gap-2'>
-                                                            <p className='font-bold'>Color:</p>
-                                                            <p>{item.colour}</p>
-                                                        </div>
-                                                        <div className='flex gap-2'>
-                                                            <p className='font-bold'>Size:</p>
-                                                            <p className='text-[#ff5c40] font-semibold'>
-                                                                {item.size}
-                                                            </p>
-                                                        </div>
-                                                    </>
+                                                <>
+                                                    <div className='flex gap-2'>
+                                                        <p className='font-bold'>Color:</p>
+                                                        <p>{item.colour}</p>
+                                                    </div>
+                                                    <div className='flex gap-2'>
+                                                        <p className='font-bold'>Size:</p>
+                                                        <p className='text-[#ff5c40] font-semibold'>
+                                                            {item.size}
+                                                        </p>
+                                                    </div>
+                                                </>
                                             </div>
                                             {/* product quantity */}
                                             <div className='flex flex-col gap-3 items-start'>
@@ -154,14 +124,14 @@ const Cart = () => {
                                                         <p className='font-bold'>Quantity:</p>
                                                         <p className='text-green-500 font-semibold italic'>X {item.quantity}</p>
                                                     </div>
-                                                    <div className='flex items-center gap-2'>
-                                                        <div onClick={handleDecrement} disabled={count <= 0} className='flex items-center justify-center bg-slate-300 cursor-pointer'>
+                                                    {/* <div className='flex items-center gap-2'>
+                                                        <div onClick={() => handleDecrement(item)} className='flex items-center justify-center bg-slate-300 cursor-pointer'>
                                                             <RemoveIcon />
                                                         </div>
-                                                        <div onClick={handleIncrement} disabled={item.product_variants && count >= item.product_variants[0].stock_quantity} className='flex items-center justify-center border-gray-400 border cursor-pointer'>
+                                                        <div onClick={() => handleIncrement(item)} className='flex items-center justify-center border-gray-400 border cursor-pointer'>
                                                             <AddIcon sx={{ color: '#ff5c40' }} />
                                                         </div>
-                                                    </div>
+                                                    </div> */}
                                                 </div>
                                                 <div className='flex gap-2'>
                                                     <p className='font-bold'>Price:</p>
@@ -221,8 +191,7 @@ const Cart = () => {
                         </div>
                         <p className='text-sm'>Are you sure you want to remove this item from the cart?</p>
                         <div className='w-full flex items-center justify-end gap-2'>
-    
-                            <div onClick={() => setDeletedItem(null)}  className='border border-gray-400 rounded-md p-1 cursor-pointer '>
+                            <div onClick={() => setDeletedItem(null)} className='border border-gray-400 rounded-md p-1 cursor-pointer'>
                                 Cancel
                             </div>
                             <div onClick={() => deleteItemFromCart(deletedItem)} className='text-[#ff5c40] font-semibold cursor-pointer'>
