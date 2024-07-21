@@ -6,6 +6,7 @@ import RemoveRedEyeOutlinedIcon from '@mui/icons-material/RemoveRedEyeOutlined';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import Swal from 'sweetalert2';
+import PopUp from '../../components/PopUp';
 
 // Context to manage the global cart state
 const CartContext = React.createContext();
@@ -279,6 +280,18 @@ const ItemDetails = () => {
 // CartProvider component to wrap the application and provide cart context
 const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const openDialog = (product) => {
+    setSelectedProduct(product);
+    setIsDialogOpen(true);
+};
+
+const closeDialog = () => {
+    setSelectedProduct(null);
+    setIsDialogOpen(false);
+};
 
   useEffect(() => {
     const storedCart = localStorage.getItem('cart');
@@ -288,8 +301,9 @@ const CartProvider = ({ children }) => {
   }, []);
 
   return (
-    <CartContext.Provider value={{ cart, setCart }}>
+    <CartContext.Provider value={{ cart, setCart, openDialog, closeDialog }}>
       {children}
+      {isDialogOpen && <PopUp product={selectedProduct} handleClosePopUp={closeDialog} />}
     </CartContext.Provider>
   );
 };

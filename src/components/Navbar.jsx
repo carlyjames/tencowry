@@ -108,13 +108,13 @@ const Navbar = (props) => {
     setError(null);
 
     try {
-      const response = await fetch('https://tencowry-api-staging.onrender.com/api/v1/ecommerce/product/search', {
+      const response = await fetch(`https://tencowry-api-staging.onrender.com/api/v1/ecommerce/product/search?query=${query}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-access-token': 'd2db2862682ea1b7618cca9b3180e04e'
         },
-        body: JSON.stringify({ query })
+        body: JSON.stringify({ search_term: query })
       });
 
       if (!response.ok) {
@@ -122,12 +122,14 @@ const Navbar = (props) => {
       }
       const data = await response.json();
       setResults(data.data || []);
+      console.log(data);
     } catch (error) {
       setError(error.message);
     } finally {
       setLoading(false);
     }
   };
+
 
   const handleLogout = async (e) => {
     e.preventDefault();
@@ -141,7 +143,7 @@ const Navbar = (props) => {
 
   const container = window !== undefined ? () => window().document.body : undefined;
 
-
+// console.log(results);
   return (
     <div className='sticky top-0 z-10 bg-[#232f3e] h-[200px] w-full flex flex-col items-center lg:justify-around justify-evenly text-white text-sm'>
       {/* first layer */}

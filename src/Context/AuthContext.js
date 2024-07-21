@@ -4,6 +4,7 @@ import { createContext, useState, useEffect } from 'react';
 import {jwtDecode} from 'jwt-decode'; 
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import userEvent from '@testing-library/user-event';
 
 const AuthContext = createContext();
 export default AuthContext;
@@ -279,6 +280,90 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
+  const CreateOrder = async (userData) => {
+    const { 
+      order_id,
+      first_name,
+      last_name,
+      address_1,
+      address_2,
+      city,
+      state,
+      country,
+      phone,
+      email,
+      products,
+      totalAmount,
+      callback_url,
+      discount_amount,
+     } = userData;
+    const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
+    const url = 'https://tencowry-api-staging.onrender.com/api/v1/ecommerce/order/create';
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': apiKey,
+        },
+        body: JSON.stringify({ 
+          email,
+          order_id,
+          first_name,
+          last_name,
+          address_1,
+          address_2,
+          city,
+          state,
+          country,
+          phone,
+          email,
+          products,
+          totalAmount,
+          callback_url,
+          discount_amount,
+         }),});
+
+      const data = await response.json();
+      console.log('Response:', data); 
+
+      if (response.ok) {
+        Swal.fire({
+          title: 'Checkout Success',
+          icon: 'success',
+          toast: true,
+          timer: 6000,
+          position: 'top-right',
+          timerProgressBar: true,
+          showConfirmButton: false,
+        });
+      } else {
+        console.error('Checkout failed:', response.status, data);
+        Swal.fire({
+          title: '' + (data.message || response.status),
+          icon: 'error',
+          toast: true,
+          timer: 6000,
+          position: 'top-right',
+          timerProgressBar: true,
+          showConfirmButton: false,
+        });
+      }
+    } catch (error) {
+      console.error('An error occurred during checkout:', error);
+      Swal.fire({
+        title: 'An Error Occurred',
+        icon: 'error',
+        toast: true,
+        timer: 6000,
+        position: 'top-right',
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
+  }
+
   const contextData = {
     user,
     setUser,
@@ -288,6 +373,7 @@ export const AuthProvider = ({ children }) => {
     loginUser,
     logoutUser,
     registerSeller,
+    CreateOrder,
     UpdatePassword,
   };
 

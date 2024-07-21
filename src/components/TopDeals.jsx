@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import PopUp from "./PopUp";
+import { CartContext } from '../Pages/ItemDetails/ItemDetails';
 
 // images
 import ad1 from '../Assets/images/TopDeals/id3-banner2.jpg';
@@ -30,6 +31,8 @@ const TopDeals = () => {
   const [deals, setDeals] = useState([]);
   const [error, setError] = useState(null);
   const [popUpOpen, setPopUpOpen] = useState(false);
+  const { openDialog } = useContext(CartContext);
+
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [favorites, setFavorites] = useState([]);
 
@@ -112,7 +115,7 @@ const TopDeals = () => {
       </div>
 
       {loading || error || !Array.isArray(deals) ? (
-        <div className="grid lg:grid-cols-4 m-4 gap-4">
+        <div className="grid lg:grid-cols-4  m-4 gap-4">
           <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '8px' }} height={300} width={280} />
           <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '8px' }} height={300} width={280} />
           <Skeleton animation='wave' variant='rectangle' sx={{ borderRadius: '8px' }} height={300} width={280} />
@@ -167,7 +170,7 @@ const TopDeals = () => {
                       ₦{item.product_variants.length > 0 && item.product_variants[0].product_discount}
                     </p>
                   </div>
-                  <div onClick={() => handleOpenPopUp(item)} className="w-full flex cursor-pointer items-center justify-end">
+                  <div onClick={() => openDialog(item)} className="w-full flex cursor-pointer items-center justify-end">
                     <div className="w-max self-end p-2 rounded-lg bg-white border border-gray-300 hover:bg-[#ff5c40] transition ease-in delay-150">
                       <ShoppingCartIcon className="cart-icon" />
                     </div>

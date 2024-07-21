@@ -1,3 +1,4 @@
+// PopUp.js
 import React, { useState, useContext } from "react";
 import Swal from 'sweetalert2';
 import { Dialog, DialogContent, DialogTitle, Button, Skeleton, IconButton } from "@mui/material";
@@ -5,7 +6,7 @@ import RemoveRedEyeOutlinedIcon from '@mui/icons-material/RemoveRedEyeOutlined';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { CancelOutlined } from "@mui/icons-material";
-import { CartContext } from "../Pages/ItemDetails/ItemDetails";
+import { CartContext } from '../Pages/ItemDetails/ItemDetails';
 
 const PopUp = ({ product, handleClosePopUp }) => {
     const token = localStorage.getItem("authTokens");
@@ -24,8 +25,6 @@ const PopUp = ({ product, handleClosePopUp }) => {
     }
 
     if (!product) return null;
-
-
 
     const {
         product_name,
@@ -48,7 +47,6 @@ const PopUp = ({ product, handleClosePopUp }) => {
     } = product;
 
     const AddToCart = async () => {
-
         const {
             product_rrp_naira: naira_price,
             product_cost,
@@ -93,8 +91,6 @@ const PopUp = ({ product, handleClosePopUp }) => {
             return;
         }
 
-
-
         if(itemInCart){
             const updatedCart = cart.map(cartItem =>
                 cartItem.product_sku === product_sku
@@ -118,7 +114,6 @@ const PopUp = ({ product, handleClosePopUp }) => {
             showConfirmButton: false,
           });
     };
-
 
     const handleIncrement = () => {
         if (product_variants && count < product_variants[0].stock_quantity) {

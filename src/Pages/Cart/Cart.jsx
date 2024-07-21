@@ -10,8 +10,10 @@ import placeholderImage from '../../Assets/images/home-placeholder.jpeg';
 import { Cancel } from '@mui/icons-material';
 import { CartContext } from '../ItemDetails/ItemDetails';
 import cartIcon from '../../Assets/images/vecteezy_shopping-cart-icon-on-a-white-background_4879563.jpg';
+import { useNavigate } from 'react-router-dom';
 
 const Cart = () => {
+    const navigate = useNavigate();
     const { cart, setCart } = useContext(CartContext);
     const [deletedItem, setDeletedItem] = useState(null);
 
@@ -37,29 +39,99 @@ const Cart = () => {
         setDeletedItem(null);
     };
 
-    const handleIncrement = (item) => {
-        if (item && item.product_variants && item.quantity ) {
-            const updatedCart = cart.map(cartItem =>
-                cartItem.product_sku === item.product_sku
-                    ? { ...cartItem, quantity: cartItem.quantity + 1 }
-                    : cartItem
-            );
-            setCart(updatedCart);
-            localStorage.setItem('cart', JSON.stringify(updatedCart));
-        }
-    };
+    const CreateOrder = async () => {
+        const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
+        const url = 'https://tencowry-api-staging.onrender.com/api/v1/ecommerce/generate/ordersummary';
+        const products = cart.map(({ product_name, idl_product_code, product_sku, product_id, category, sub_category, main_picture, supplier_id, quantity, naira_price, product_cost, currency, currency_adder, exchange_rate, size, colour, weight, brand, description, made_in, material }) => ({
+            product_name,
+            idl_product_code,
+            product_sku,
+            product_id,
+            category,
+            sub_category,
+            main_picture,
+            supplier_id,
+            quantity,
+            naira_price,
+            product_cost,
+            currency,
+            currency_adder,
+            exchange_rate,
+            size,
+            colour,
+            weight,
+            brand,
+            description,
+            made_in,
+            material
+        }));
+        console.log(JSON.stringify( {products} ));
 
-    const handleDecrement = (item) => {
-        if (item.quantity > 1) {
-            const updatedCart = cart.map(cartItem =>
-                cartItem.product_sku === item.product_sku
-                    ? { ...cartItem, quantity: cartItem.quantity - 1 }
-                    : cartItem
-            );
-            setCart(updatedCart);
-            localStorage.setItem('cart', JSON.stringify(updatedCart));
-        }
-    };
+        try {
+            const response = await fetch(url, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-access-token': apiKey
+              },
+              body: JSON.stringify({products} )
+            });
+        
+            const data = await response.json();
+        
+            if (response.ok && data.status) { 
+        
+              try {
+                  Swal.fire({
+                      title: 'Order generated successfully',
+                      icon: 'success',
+                  toast: true,
+                  timer: 6000,
+                  position: 'top-right',
+                  timerProgressBar: true,
+                  showConfirmButton: false
+                });
+                localStorage.setItem('order', JSON.stringify(data));
+                // navigate('/checkout');
+                console.log(data);
+              } catch (error) {
+                console.error('Invalid token:', error);
+                Swal.fire({
+                  title: 'Invalid Token',
+                  icon: 'error',
+                  toast: true,
+                  timer: 6000,
+                  position: 'top-right',
+                  timerProgressBar: true,
+                  showConfirmButton: false
+                });
+                return;
+              }
+        
+            } else {
+              Swal.fire({
+                title: 'Incorrect order',
+                icon: 'error',
+                toast: true,
+                timer: 6000,
+                position: 'top-right',
+                timerProgressBar: true,
+                showConfirmButton: false
+              });
+            }
+          } catch (error) {
+            console.error('Error occurred during creating order:', error);
+            Swal.fire({
+              title: 'An Error Occurred',
+              icon: 'error',
+              toast: true,
+              timer: 6000,
+              position: 'top-right',
+              timerProgressBar: true,
+              showConfirmButton: false
+            });
+          }
+    }
 
     const totalAmount = cart.reduce((acc, item) => acc + (item.naira_price * item.quantity), 0);
 
@@ -170,9 +242,11 @@ const Cart = () => {
                                     <p className='font-bold text-green-500'>₦{totalAmount}</p>
                                 </div>
                                 <hr />
-                                <Button sx={{ color: 'white', textTransform: 'none' }} className='cart-btn'>
-                                    Proceed to Checkout
-                                </Button>
+                                <Link onClick={CreateOrder}>     
+                                    <Button sx={{ color: 'white', textTransform: 'none' }} className='cart-btn'>
+                                        Proceed to Checkout
+                                    </Button>
+                                </Link>
                             </div>
                         </div>
                     </div>
