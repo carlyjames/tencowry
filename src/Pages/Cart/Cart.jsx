@@ -65,72 +65,72 @@ const Cart = () => {
             made_in,
             material
         }));
-        console.log(JSON.stringify( {products} ));
+        console.log(JSON.stringify({ products }));
 
         try {
             const response = await fetch(url, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'x-access-token': apiKey
-              },
-              body: JSON.stringify({products} )
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-access-token': apiKey
+                },
+                body: JSON.stringify({ products })
             });
-        
+
             const data = await response.json();
-        
-            if (response.ok && data.status) { 
-        
-              try {
-                  Swal.fire({
-                      title: 'Order generated successfully',
-                      icon: 'success',
-                  toast: true,
-                  timer: 6000,
-                  position: 'top-right',
-                  timerProgressBar: true,
-                  showConfirmButton: false
-                });
-                localStorage.setItem('order', JSON.stringify(data));
-                // navigate('/checkout');
-                console.log(data);
-              } catch (error) {
-                console.error('Invalid token:', error);
-                Swal.fire({
-                  title: 'Invalid Token',
-                  icon: 'error',
-                  toast: true,
-                  timer: 6000,
-                  position: 'top-right',
-                  timerProgressBar: true,
-                  showConfirmButton: false
-                });
-                return;
-              }
-        
+
+            if (response.ok && data.status) {
+
+                try {
+                    Swal.fire({
+                        title: 'Order generated successfully',
+                        icon: 'success',
+                        toast: true,
+                        timer: 6000,
+                        position: 'top-right',
+                        timerProgressBar: true,
+                        showConfirmButton: false
+                    });
+                    localStorage.setItem('order', JSON.stringify(data));
+                    navigate('/checkout');
+                    console.log(data);
+                } catch (error) {
+                    console.error('Invalid token:', error);
+                    Swal.fire({
+                        title: 'Invalid Token',
+                        icon: 'error',
+                        toast: true,
+                        timer: 6000,
+                        position: 'top-right',
+                        timerProgressBar: true,
+                        showConfirmButton: false
+                    });
+                    return;
+                }
+
             } else {
-              Swal.fire({
-                title: 'Incorrect order',
+                Swal.fire({
+                    title: 'Incorrect order',
+                    icon: 'error',
+                    toast: true,
+                    timer: 6000,
+                    position: 'top-right',
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            }
+        } catch (error) {
+            console.error('Error occurred during creating order:', error);
+            Swal.fire({
+                title: 'An Error Occurred',
                 icon: 'error',
                 toast: true,
                 timer: 6000,
                 position: 'top-right',
                 timerProgressBar: true,
                 showConfirmButton: false
-              });
-            }
-          } catch (error) {
-            console.error('Error occurred during creating order:', error);
-            Swal.fire({
-              title: 'An Error Occurred',
-              icon: 'error',
-              toast: true,
-              timer: 6000,
-              position: 'top-right',
-              timerProgressBar: true,
-              showConfirmButton: false
             });
-          }
+        }
     }
 
     const totalAmount = cart.reduce((acc, item) => acc + (item.naira_price * item.quantity), 0);
@@ -142,7 +142,7 @@ const Cart = () => {
 
                 {cart.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-screen">
-                        <img src={cartIcon} alt="Empty Cart" className="w-48 h-48 mb-4"/>
+                        <img src={cartIcon} alt="Empty Cart" className="w-48 h-48 mb-4" />
                         <h1 className="text-2xl text-gray-500">Your cart is empty</h1>
                         <Link to='/' className='mt-4 p-2 text-sm border border-gray-500 rounded-md hover:text-blue-400 hover:border-blue-400'>
                             Continue Shopping
@@ -179,12 +179,12 @@ const Cart = () => {
                                                 <>
                                                     <div className='flex gap-2'>
                                                         <p className='font-bold'>Color:</p>
-                                                        <p>{item.colour}</p>
+                                                        <p>{item.colour || 'N/A'}</p>
                                                     </div>
                                                     <div className='flex gap-2'>
                                                         <p className='font-bold'>Size:</p>
                                                         <p className='text-[#ff5c40] font-semibold'>
-                                                            {item.size}
+                                                            {item?.size || 'N/A'}
                                                         </p>
                                                     </div>
                                                 </>
@@ -242,7 +242,7 @@ const Cart = () => {
                                     <p className='font-bold text-green-500'>₦{totalAmount}</p>
                                 </div>
                                 <hr />
-                                <Link onClick={CreateOrder}>     
+                                <Link onClick={CreateOrder}>
                                     <Button sx={{ color: 'white', textTransform: 'none' }} className='cart-btn'>
                                         Proceed to Checkout
                                     </Button>

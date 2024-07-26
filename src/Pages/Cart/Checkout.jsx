@@ -1,13 +1,15 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Navbar, Footer } from '../../components';
 import { Link } from 'react-router-dom';
-// import Swal from 'sweetalert2';
+import Swal from 'sweetalert2';
 import AuthContext from '../../Context/AuthContext';
 
 const Checkout = () => {
     const [order, setOrder] = useState([]);
     const [loading, setLoading] = useState(false);
     const { CreateOrder } = useContext(AuthContext);
+    const [isChecked, setIsChecked] = useState(false);
+    const [shippingInfoLoaded, setShippingInfoLoaded] = useState(false);
     const token = localStorage.getItem("authTokens");
     let email = '';
     let first_name = '';
@@ -31,7 +33,47 @@ const Checkout = () => {
         if (storedOrder) {
             setOrder(JSON.parse(storedOrder));
         }
-    }, []);
+
+        const fetchShippingInfo = async () => {
+            const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
+            const url = `https://tencowry-api-staging.onrender.com/api/v1/ecommerce/shipping/info/${email}`;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-access-token': apiKey,
+                    },
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log("Fetched shipping info:", data);
+                    const shippingData = data.data;
+                    setState((prevState) => ({
+                        ...prevState,
+                        first_name: shippingData.first_name || first_name,
+                        last_name: shippingData.last_name || last_name,
+                        address_1: shippingData.address_1 || '',
+                        address_2: shippingData.address_2 || '',
+                        city: shippingData.city || '',
+                        state: shippingData.state || '',
+                        country: shippingData.country || 'Nigeria',
+                        post_code: shippingData.postcode || '',
+                        phone: shippingData.phone || phone,
+                    }));
+                    setShippingInfoLoaded(true);
+                } else {
+                    console.error("Failed to fetch shipping info:", response.statusText);
+                }
+            } catch (error) {
+                console.error("Failed to fetch shipping info:", error);
+            }
+        };
+
+        fetchShippingInfo();
+    }, [email, first_name, last_name, phone]);
 
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat('en-NG', {
@@ -58,10 +100,11 @@ const Checkout = () => {
         city: '',
         state: '',
         country: 'Nigeria',
+        post_code: '',
         phone,
         products,
         totalAmount,
-        callback_url: '',
+        callback_url: '/confirmation',
         discount_amount: '',
     });
 
@@ -87,16 +130,73 @@ const Checkout = () => {
                 city: '',
                 state: '',
                 country: 'Nigeria',
+                post_code: '',
                 phone,
                 products,
                 totalAmount,
-                callback_url: '',
+                callback_url: '/confirmation',
                 discount_amount: '',
             });
         } catch (error) {
             console.error("Checkout failed:", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleCheckboxChange = (e) => {
+        setIsChecked(e.target.checked);
+    };
+
+    const saveAddress = async () => {
+        const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
+        const url = `https://tencowry-api-staging.onrender.com/api/v1/ecommerce/shipping/info/${email}`;
+        const shipping_info = {
+            first_name,
+            last_name,
+            address_1: state.address_1,
+            address_2: state.address_2,
+            city: state.city,
+            state: state.state,
+            postcode: state.post_code,
+            country: state.country,
+            phone,
+            email,
+        };
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-access-token': apiKey
+                },
+                body: JSON.stringify({ shipping_info }),
+            });
+            console.log(shipping_info);
+            if (!response.ok) {
+                const errorResponse = await response.json();
+                console.error("Error response:", errorResponse);
+                throw new Error('Failed to save address');
+            }
+            Swal.fire({
+                title: 'Shipping details saved successfully',
+                icon: 'success',
+                toast: true,
+                timer: 6000,
+                position: 'top-right',
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+        } catch (error) {
+            Swal.fire({
+                title: 'Error saving shipping details',
+                icon: 'error',
+                toast: true,
+                timer: 6000,
+                position: 'top-right',
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
         }
     };
 
@@ -122,48 +222,72 @@ const Checkout = () => {
                                 <h1 className='text-gray-400'>Order ID - {order.order_id}</h1>
                             </div>
                             <hr />
+
                             <form onSubmit={handleSubmit} className='w-full flex flex-col gap-2 font-medium lg:px-6' name='register'>
-                                <div className='w-full my-3 flex flex-col items-start gap-2'>
-                                    <label htmlFor='first_name' className='flex gap-1 w-full'>First Name</label>
-                                    <input value={first_name} id='first_name' name='first_name' className='border border-gray-400 w-full p-2 rounded-md hover:border-blue-400' type="text" disabled />
-                                </div>
-                                <div className='w-full flex flex-col items-start gap-2'>
-                                    <label htmlFor='last_name' className='flex gap-1 w-full'>Last Name</label>
-                                    <input value={last_name} id='last_name' name='last_name' className='border border-gray-400 w-full p-2 rounded-md hover:border-blue-400' type="text" disabled />
-                                </div>
-                                <div className='w-full flex flex-col items-start gap-2'>
-                                    <label htmlFor='phone' className='flex gap-1 w-full'>Phone</label>
-                                    <input value={phone} id='phone' name='phone' className='border border-gray-400 w-full p-2 rounded-md hover:border-blue-400' type="number" disabled />
-                                </div>
-                                <div className='w-full flex flex-col items-start gap-2'>
-                                    <label htmlFor='email' className='flex gap-1 w-full'>Email</label>
-                                    <input value={email} id='email' name='email' className='border border-gray-400 w-full p-2 rounded-md hover:border-blue-400' type="email" disabled />
-                                </div>
-                                <div className='w-full flex flex-col items-start gap-2'>
-                                    <label htmlFor='address_1' className='flex gap-1 w-full'>Shipping Address 1</label>
-                                    <input id='address_1' name='address_1' value={state.address_1} onChange={handleChange1} className='border border-gray-400 w-full p-2 rounded-md hover:border-blue-400' type="text" required />
-                                </div>
-                                <div className='w-full flex flex-col items-start gap-2'>
-                                    <label htmlFor='address_2' className='flex gap-1 w-full'>Shipping Address 2</label>
-                                    <input id='address_2' name='address_2' value={state.address_2} onChange={handleChange1} className='border border-gray-400 w-full p-2 rounded-md hover:border-blue-400' type="text" />
-                                </div>
-                                <div className='w-full flex flex-col items-start gap-2'>
-                                    <label htmlFor='city' className='flex gap-1 w-full'>Shipping City</label>
-                                    <input id='city' name='city' value={state.city} onChange={handleChange1} className='border border-gray-400 w-full p-2 rounded-md hover:border-blue-400' type="text" required />
-                                </div>
-                                <div className='w-full flex flex-col items-start gap-2'>
-                                    <label htmlFor='state' className='flex gap-1 w-full'>Shipping State</label>
-                                    <input id='state' name='state' value={state.state} onChange={handleChange1} className='border border-gray-400 w-full p-2 rounded-md hover:border-blue-400' type="text" required />
-                                </div>
-                                <div className='w-full flex flex-col items-start gap-2'>
-                                    <label htmlFor='country' className='flex gap-1 w-full'>Shipping Country</label>
-                                    <input id='country' name='country' value={state.country} className='border border-gray-400 w-full p-2 rounded-md hover:border-blue-400' type="text" disabled />
-                                </div>
-                                <div className='w-full flex items-center gap-2 my-2'>
-                                    <input type="checkbox" name="save" id="save" />
-                                    <label htmlFor="save">Save details for future orders</label>
-                                </div>
-                                <button className={`w-max p-2 px-3 self-center rounded-md bg-gray-400 text-white ${loading ? 'cursor-not-allowed' : ''}`} type="submit">
+                                {shippingInfoLoaded === true ? (
+                                    <div className='grid lg:grid-cols-2'>
+                                        <div className='flex flex-col gap-2'>
+                                            <h1 className='flex items-center gap-2'>Name : <span>{state.first_name}</span></h1>
+                                            <h1 className='flex items-center gap-2'>Phone Number : <span>{state.phone}</span></h1>
+                                            <h1 className='flex items-center gap-2'>Address : <span>{state.address_1}</span></h1>
+                                        </div>
+                                        <div className='flex flex-col gap-2'>
+                                            <h1 className='flex items-center gap-2'>City : <span>{state.city}</span></h1>
+                                            <h1 className='flex items-center gap-2'>State : <span>{state.state}</span></h1>
+                                            <h1 className='flex items-center gap-2'>Email : <span>{state.email}</span></h1>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className='w-full flex flex-col gap-2'>
+                                        <div className='w-full my-3 flex flex-col items-start gap-2'>
+                                            <label htmlFor='first_name' className='flex gap-1 w-full'>First Name</label>
+                                            <input value={first_name} id='first_name' name='first_name' className='border border-gray-400 w-full p-2 rounded-md hover:border-blue-400' type="text" disabled />
+                                        </div>
+                                        <div className='w-full flex flex-col items-start gap-2'>
+                                            <label htmlFor='last_name' className='flex gap-1 w-full'>Last Name</label>
+                                            <input value={last_name} id='last_name' name='last_name' className='border border-gray-400 w-full p-2 rounded-md hover:border-blue-400' type="text" disabled />
+                                        </div>
+                                        <div className='w-full flex flex-col items-start gap-2'>
+                                            <label htmlFor='phone' className='flex gap-1 w-full'>Phone</label>
+                                            <input value={phone} id='phone' name='phone' className='border border-gray-400 w-full p-2 rounded-md hover:border-blue-400' type="number" disabled />
+                                        </div>
+                                        <div className='w-full flex flex-col items-start gap-2'>
+                                            <label htmlFor='email' className='flex gap-1 w-full'>Email</label>
+                                            <input value={email} id='email' name='email' className='border border-gray-400 w-full p-2 rounded-md hover:border-blue-400' type="email" disabled />
+                                        </div>
+                                        <div className='w-full flex flex-col items-start gap-2'>
+                                            <label htmlFor='address_1' className='flex gap-1 w-full'>Shipping Address 1</label>
+                                            <input id='address_1' name='address_1' value={state.address_1} onChange={handleChange1} className='border border-gray-400 w-full p-2 rounded-md hover:border-blue-400' type="text" required />
+                                        </div>
+                                        <div className='w-full flex flex-col items-start gap-2'>
+                                            <label htmlFor='address_2' className='flex gap-1 w-full'>Shipping Address 2</label>
+                                            <input id='address_2' name='address_2' value={state.address_2} onChange={handleChange1} className='border border-gray-400 w-full p-2 rounded-md hover:border-blue-400' type="text" />
+                                        </div>
+                                        <div className='w-full flex flex-col items-start gap-2'>
+                                            <label htmlFor='city' className='flex gap-1 w-full'>Shipping City</label>
+                                            <input id='city' name='city' value={state.city} onChange={handleChange1} className='border border-gray-400 w-full p-2 rounded-md hover:border-blue-400' type="text" required />
+                                        </div>
+                                        <div className='w-full flex flex-col items-start gap-2'>
+                                            <label htmlFor='state' className='flex gap-1 w-full'>Shipping State</label>
+                                            <input id='state' name='state' value={state.state} onChange={handleChange1} className='border border-gray-400 w-full p-2 rounded-md hover:border-blue-400' type="text" required />
+                                        </div>
+                                        <div className='w-full flex flex-col items-start gap-2'>
+                                            <label htmlFor='country' className='flex gap-1 w-full'>Shipping Country</label>
+                                            <input id='country' name='country' value={state.country} className='border border-gray-400 w-full p-2 rounded-md hover:border-blue-400' type="text" disabled />
+                                        </div>
+                                        <div className='w-full flex flex-col items-start gap-2'>
+                                            <label htmlFor='post_code' className='flex gap-1 w-full'>Post Code</label>
+                                            <input id='post_code' name='post_code' value={state.post_code} onChange={handleChange1} className='border border-gray-400 w-full p-2 rounded-md hover:border-blue-400' type="text" />
+                                        </div>
+                                        <div onClick={saveAddress} className='w-full flex items-center gap-2 my-2'>
+                                            <input checked={isChecked} onChange={handleCheckboxChange} type="checkbox" name="save" id="save" />
+                                            <label htmlFor="save">Save details for future orders</label>
+                                            {/* <p>The checkbox is {isChecked ? 'checked' : 'unchecked'}.</p> */}
+                                        </div>
+                                    </div>
+                                )}
+
+                                <button className={`w-max p-2 px-3 self-center rounded-md bg-[#ff5c40] text-white ${loading ? 'cursor-not-allowed' : ''}`} type="submit">
                                     {loading ? (
                                         <div className='flex items-center justify-center gap-2'>
                                             <div className="spinner"></div>
@@ -186,7 +310,7 @@ const Checkout = () => {
                                 <h1 className='flex items-center gap-2'>Estimated Delivery: <p className='text-green-500'>{order.estimated_delivery}</p></h1>
                             </div>
                             {products.map((item, index) => (
-                                <div key={index} className='text-sm flex items-center w-full justify-between lg:gap-12 mb-2 lg:p-5 bg-[#f9fafc] rounded-md'>
+                                <div key={index} className='text-sm flex flex-col lg:flex-row  items-center w-full justify-between lg:gap-12 mb-2 lg:p-5 bg-[#f9fafc] rounded-md'>
                                     <img src={item.main_picture} alt={item.product_name} className='w-1/4 h-16 object-cover' />
                                     <div className='flex flex-col gap-2 w-3/4 text-xs'>
                                         <p className='text-sm text-gray-400'>{item.product_name}</p>

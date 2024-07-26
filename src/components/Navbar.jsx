@@ -100,36 +100,45 @@ const Navbar = (props) => {
 
   const handleInputChange = (e) => {
     setQuery(e.target.value);
-  };
+};
 
-  const handleSearch = async (e) => {
+const handleSearch = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(`https://tencowry-api-staging.onrender.com/api/v1/ecommerce/product/search?query=${query}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-access-token': 'd2db2862682ea1b7618cca9b3180e04e'
-        },
-        body: JSON.stringify({ search_term: query })
-      });
+        const params = new URLSearchParams({
+            skip: '0',
+            limit: '10'
+        });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch data');
-      }
-      const data = await response.json();
-      setResults(data.data || []);
-      console.log(data);
+        const response = await fetch(`https://tencowry-api-staging.onrender.com/api/v1/ecommerce/product/search?${params.toString()}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-access-token': 'd2db2862682ea1b7618cca9b3180e04e'
+            },
+            body: JSON.stringify({ search_term: query })
+        });
+
+        const responseData = await response.json();
+
+        if (!response.ok) {
+            console.error('Response status:', response.status);
+            console.error('Response data:', responseData);
+            throw new Error(responseData.message || 'Failed to fetch data');
+        }
+
+        setResults(responseData.data || []);
+        console.log(responseData);
     } catch (error) {
-      setError(error.message);
+        setError(error.message);
+        console.error('Error fetching data:', error);
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
-
+};
 
   const handleLogout = async (e) => {
     e.preventDefault();
@@ -141,11 +150,12 @@ const Navbar = (props) => {
     }
   };
 
+
   const container = window !== undefined ? () => window().document.body : undefined;
 
-// console.log(results);
+  // console.log(results);
   return (
-    <div className='sticky top-0 z-10 bg-[#232f3e] h-[200px] w-full flex flex-col items-center lg:justify-around justify-evenly text-white text-sm'>
+    <div className='sticky top-0 z-10 bg-[#232f3e] h-[200px] w-full flex flex-col items-center lg:justify-around justify-evenly text-white text-sm '>
       {/* first layer */}
       <div className='flex lg:px-6 px-4 lg:pt-2 items-center justify-between w-full '>
         <div className='flex items-center gap-2 '>
