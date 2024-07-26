@@ -4,6 +4,7 @@ import { useState, useContext } from 'react';
 import NavItems from './Data/NavItems';
 import RegisterSeller from './RegisterSeller';
 import { CartContext } from '../Pages/ItemDetails/ItemDetails';
+import { useNavigate } from 'react-router-dom';
 
 // images
 import logo from '../Assets/images/logo_2_main.png'
@@ -31,6 +32,7 @@ const drawerWidth = '100%';
 
 const Navbar = (props) => {
   const { window } = props;
+  const navigate = useNavigate();
   const [open, setOpen] = useState(true)
   const [mobileOpen, setMobileOpen] = useState(false);
   const [seller, setSeller] = useState(false);
@@ -109,7 +111,7 @@ const handleSearch = async (e) => {
 
     try {
         const params = new URLSearchParams({
-            skip: '0',
+            skip: '1',
             limit: '10'
         });
 
@@ -129,7 +131,7 @@ const handleSearch = async (e) => {
             console.error('Response data:', responseData);
             throw new Error(responseData.message || 'Failed to fetch data');
         }
-
+        navigate(`/search?query=${query}`, { state: { results: responseData.data, loading: false } })
         setResults(responseData.data || []);
         console.log(responseData);
     } catch (error) {
@@ -193,8 +195,6 @@ const handleSearch = async (e) => {
           <IconButton className="searchBar" type='submit' sx={{ background: '#ff5c40', borderRadius: '0 8px 8px 0', padding: '10px' }}>
             <Search sx={{ color: 'white' }} />
           </IconButton>
-          {loading && <p>Loading...</p>}
-          {/* {error && <p>Error: {error}</p>} */}
         </form>
         {/* <div>
           {results.map(result => (

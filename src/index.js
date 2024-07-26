@@ -10,7 +10,7 @@ import PrivateRoute from './Utils/PrivateRoute'
 import { CartProvider } from './Pages/ItemDetails/ItemDetails'
 
 // pages
-import { TopDeals, PopularProducts, NewArrivals, Item, Cart, Profile, Orders, Favourites, Checkout, Confirmation } from './Pages'
+import { TopDeals, PopularProducts, NewArrivals, Item, Cart, Profile, Orders, Favourites, Checkout, Confirmation, Search } from './Pages'
 
 import { render } from 'react-dom'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
@@ -32,6 +32,7 @@ render(
             <Route path='/my-favorites' element={<Favourites />} />
             <Route path='/checkout' element={<Checkout />} />
             <Route path='/confirmation' element={<Confirmation />} />
+            <Route path='/search' element={<Search />} />
 
             {/* item details */}
             <Route path='/product/detail/:idl_product_code/:supplier_id' element={<Item />} />
