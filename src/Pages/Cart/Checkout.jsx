@@ -15,6 +15,8 @@ const Checkout = () => {
     let first_name = '';
     let last_name = '';
     let phone = '';
+    // console.log("order_id :", order.order_id);
+    // let order_id = order.order_id;
 
     if (token) {
         try {
@@ -31,25 +33,34 @@ const Checkout = () => {
     useEffect(() => {
         const storedOrder = localStorage.getItem('order');
         if (storedOrder) {
-            setOrder(JSON.parse(storedOrder));
+            const orderData = JSON.parse(storedOrder);
+            setOrder(orderData);
+            setState((prevState) => ({
+                ...prevState,
+                order_id: orderData.order_id,
+                products: orderData.products || [],
+                shipping_cost: orderData.shipping_cost || 0,
+                products_amount: orderData.products_amount || 0,
+                totalAmount: Number(orderData.shipping_cost || 0) + Number(orderData.products_amount || 0),
+            }));
         }
 
         const fetchShippingInfo = async () => {
-            const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
-            const url = `https://tencowry-api-staging.onrender.com/api/v1/ecommerce/shipping/info/${email}`;
+            const apiRoot = process.env.REACT_APP_API_ROOT;
+            const apiKey = process.env.REACT_APP_API_KEY;
+            const url = `${apiRoot}/shipping/info/${email}`;
 
             try {
                 const response = await fetch(url, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'x-access-token': apiKey,
+                        'x-access-token': `${apiKey}`
                     },
                 });
 
                 if (response.ok) {
                     const data = await response.json();
-                    console.log("Fetched shipping info:", data);
                     const shippingData = data.data;
                     setState((prevState) => ({
                         ...prevState,
@@ -102,11 +113,12 @@ const Checkout = () => {
         country: 'Nigeria',
         post_code: '',
         phone,
-        products,
+        products: order.products,
         totalAmount,
-        callback_url: '/confirmation',
-        discount_amount: '',
+        callback_url: 'https://tencowry.vercel.app/confirmation',
+        discount_amount: '0',
     });
+console.log(state);
 
     const handleChange1 = (e) => {
         const { name, value } = e.target;
@@ -120,6 +132,8 @@ const Checkout = () => {
         try {
             const response = await CreateOrder(state);
             console.log("CreateOrder response:", response);
+    
+            // Reset the form state after a successful submission
             setState({
                 email,
                 order_id: order.order_id,
@@ -132,25 +146,64 @@ const Checkout = () => {
                 country: 'Nigeria',
                 post_code: '',
                 phone,
-                products,
+                products: order.products,
                 totalAmount,
-                callback_url: '/confirmation',
-                discount_amount: '',
+                callback_url: 'https://tencowry.vercel.app/confirmation',
+                discount_amount: '0',
             });
+    
+            // Handle the response from the CreateOrder function
+            if (response && response.status === false) {
+                console.error("Order creation failed:", response.message);
+                Swal.fire({
+                    title: 'Order creation failed',
+                    text: response.message,
+                    icon: 'error',
+                    toast: true,
+                    timer: 6000,
+                    position: 'top-right',
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire({
+                    title: 'Order created successfully',
+                    text: response.message,
+                    icon: 'success',
+                    toast: true,
+                    timer: 6000,
+                    position: 'top-right',
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            }
         } catch (error) {
             console.error("Checkout failed:", error);
+            Swal.fire({
+                title: 'Error during checkout',
+                text: error.message,
+                icon: 'error',
+                toast: true,
+                timer: 6000,
+                position: 'top-right',
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
         } finally {
             setLoading(false);
         }
     };
+    
 
     const handleCheckboxChange = (e) => {
         setIsChecked(e.target.checked);
     };
 
     const saveAddress = async () => {
-        const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
-        const url = `https://tencowry-api-staging.onrender.com/api/v1/ecommerce/shipping/info/${email}`;
+        const apiRoot = process.env.REACT_APP_API_ROOT;
+        const apiKey = process.env.REACT_APP_API_KEY;
+        const url = `${apiRoot}/shipping/info/${email}`;
+
         const shipping_info = {
             first_name,
             last_name,

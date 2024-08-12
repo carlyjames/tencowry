@@ -31,15 +31,17 @@ export const AuthProvider = ({ children }) => {
 
   const loginUser = async (userData) => {
     const { email, password } = userData;
-    const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
-    const url = 'https://tencowry-api-staging.onrender.com/api/v1/ecommerce/login/customer';
+
+    const apiRoot = process.env.REACT_APP_API_ROOT;
+    const apiKey = process.env.REACT_APP_API_KEY;
+    const url = `${apiRoot}/login/customer`;
   
     try {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-access-token': apiKey
+          'x-access-token': `${apiKey}`
         },
         body: JSON.stringify({ email, password })
       });
@@ -104,14 +106,15 @@ export const AuthProvider = ({ children }) => {
   
   const registerUser = async (userData) => {
     const { first_name, last_name, phone, email, password } = userData;
-    const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
-    const url = 'https://tencowry-api-staging.onrender.com/api/v1/ecommerce/signup/customer';
+    const apiRoot = process.env.REACT_APP_API_ROOT;
+    const apiKey = process.env.REACT_APP_API_KEY;
+    const url = `${apiRoot}/signup/customer`;
     try {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-access-token': apiKey,
+          'x-access-token': `${apiKey}`
         },
         body: JSON.stringify({
           first_name,
@@ -161,15 +164,17 @@ export const AuthProvider = ({ children }) => {
 
   const registerSeller = async (userData) => {
     const { full_name, address_1, city, state, country, phone, email, brand_name } = userData;
-    const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
-    const url = 'https://tencowry-api-staging.onrender.com/api/v1/ecommerce/seller/prospective';
+
+    const apiRoot = process.env.REACT_APP_API_ROOT;
+    const apiKey = process.env.REACT_APP_API_KEY;
+    const url = `${apiRoot}/seller/prospective`;
 
     try {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-access-token': apiKey,
+          'x-access-token': `${apiKey}`
         },
         body: JSON.stringify({full_name, address_1, city, state, country, phone, email, brand_name}),});
 
@@ -213,15 +218,16 @@ export const AuthProvider = ({ children }) => {
   const UpdatePassword = async (userData) => {
     const { email, old_password, new_password } = userData;
 
-    const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
-    const url = 'https://tencowry-api-staging.onrender.com/api/v1/ecommerce/update_password';
+    const apiRoot = process.env.REACT_APP_API_ROOT;
+    const apiKey = process.env.REACT_APP_API_KEY;
+    const url = `${apiRoot}/update_password`;
 
     try {
       const response = await fetch(url, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'x-access-token': apiKey,
+          'x-access-token': `${apiKey}`
         },
         body: JSON.stringify({ email, old_password, new_password }),});
 
@@ -297,15 +303,18 @@ export const AuthProvider = ({ children }) => {
       callback_url,
       discount_amount,
      } = userData;
-    const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
-    const url = 'https://tencowry-api-staging.onrender.com/api/v1/ecommerce/order/create';
 
+    
+    const apiRoot = process.env.REACT_APP_API_ROOT;
+    const apiKey = process.env.REACT_APP_API_KEY;
+    const url = `${apiRoot}/order/create`;
+  
     try {
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-access-token': apiKey,
+          'x-access-token': `${apiKey}`
         },
         body: JSON.stringify({ 
           email,
@@ -323,21 +332,25 @@ export const AuthProvider = ({ children }) => {
           totalAmount,
           callback_url,
           discount_amount,
-         }),});
-
+         }),
+      });
+  
       const data = await response.json();
       console.log('Response:', data); 
-
+  
       if (response.ok) {
         Swal.fire({
           title: 'Checkout Success',
           icon: 'success',
           toast: true,
-          timer: 6000,
+          timer: 2000,
           position: 'top-right',
           timerProgressBar: true,
           showConfirmButton: false,
         });
+        setTimeout(() => {
+          window.location.href = response?.data?.link; 
+        }, 3000);
       } else {
         console.error('Checkout failed:', response.status, data);
         Swal.fire({
@@ -363,6 +376,7 @@ export const AuthProvider = ({ children }) => {
       });
     }
   }
+  
 
   const contextData = {
     user,

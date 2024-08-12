@@ -20,8 +20,9 @@ const ItemDetails = () => {
 
   useEffect(() => {
     const fetchItemDetails = async () => {
-      const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
-      const url = `https://tencowry-api-staging.onrender.com/api/v1/ecommerce/product/detail/${idl_product_code}/${supplier_id}`;
+      const apiRoot = process.env.REACT_APP_API_ROOT;
+      const apiKey = process.env.REACT_APP_API_KEY;
+      const url = `${apiRoot}/product/detail/${idl_product_code}/${supplier_id}`;
 
       try {
         setLoading(true);
@@ -29,7 +30,7 @@ const ItemDetails = () => {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'x-access-token': apiKey
+            'x-access-token': `${apiKey}`
           },
         });
         if (!response.ok) {

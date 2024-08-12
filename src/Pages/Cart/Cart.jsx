@@ -40,8 +40,10 @@ const Cart = () => {
     };
 
     const CreateOrder = async () => {
-        const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
-        const url = 'https://tencowry-api-staging.onrender.com/api/v1/ecommerce/generate/ordersummary';
+        const apiRoot = process.env.REACT_APP_API_ROOT;
+        const apiKey = process.env.REACT_APP_API_KEY;
+        const url = `${apiRoot}/generate/ordersummary`;
+
         const products = cart.map(({ product_name, idl_product_code, product_sku, product_id, category, sub_category, main_picture, supplier_id, quantity, naira_price, product_cost, currency, currency_adder, exchange_rate, size, colour, weight, brand, description, made_in, material }) => ({
             product_name,
             idl_product_code,
@@ -72,7 +74,7 @@ const Cart = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-access-token': apiKey
+                    'x-access-token': `${apiKey}`
                 },
                 body: JSON.stringify({ products })
             });

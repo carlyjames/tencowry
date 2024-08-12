@@ -109,18 +109,23 @@ const handleSearch = async (e) => {
     setLoading(true);
     setError(null);
 
-    try {
-        const params = new URLSearchParams({
-            skip: '1',
-            limit: '10'
-        });
 
-        const response = await fetch(`https://tencowry-api-staging.onrender.com/api/v1/ecommerce/product/search?${params.toString()}`, {
+    
+    try {
+      const params = new URLSearchParams({
+        skip: '1',
+        limit: '10'
+      });
+      const apiRoot = process.env.REACT_APP_API_ROOT;
+      const apiKey = process.env.REACT_APP_API_KEY;
+      const url = `${apiRoot}/product/search?${params.toString()}`;
+
+        const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'x-access-token': 'd2db2862682ea1b7618cca9b3180e04e'
-            },
+                'x-access-token': `${apiKey}`
+              },
             body: JSON.stringify({ search_term: query })
         });
 
@@ -300,7 +305,7 @@ const handleSearch = async (e) => {
 
 
       {seller && (
-        <section className=' absolute top-40  w-full flex justify-center'>
+        <section className=' absolute top-10  w-full flex justify-center'>
           <RegisterSeller toggleSeller={toggleSeller} />
         </section>
       )}

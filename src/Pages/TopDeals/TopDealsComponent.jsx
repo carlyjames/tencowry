@@ -61,18 +61,19 @@ const TopDealsComponent = () => {
 
 
   const categories = ['Fashion & Accessories', 'homeWares', 'Beauty & Personal Care', 'Electronics & Games', 'Sports', 'General Merchandise'];
-  const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
 
   const fetchDeals = async (category) => {
     setLoading(true);
-    const url = `https://tencowry-api-staging.onrender.com/api/v1/ecommerce/product/topdeals/${category}?skip=2&limit=20`;
+    const apiRoot = process.env.REACT_APP_API_ROOT;
+    const apiKey = process.env.REACT_APP_API_KEY;
+    const url = `${apiRoot}/product/topdeals/${category}?skip=2&limit=20`;
 
     try {
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'x-access-token': apiKey
+          'x-access-token': `${apiKey}`
         },
       });
 

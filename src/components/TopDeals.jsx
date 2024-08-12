@@ -38,15 +38,19 @@ const TopDeals = () => {
 
   useEffect(() => {
     const fetchDeals = async () => {
-      const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
-      const url = 'https://tencowry-api-staging.onrender.com/api/v1/ecommerce/product/topdeals?skip=2&limit=20';
+      // const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
+      const apiRoot = process.env.REACT_APP_API_ROOT;
+      const apiKey = process.env.REACT_APP_API_KEY;
+      const url = `${apiRoot}/product/topdeals?skip=2&limit=20`;
 
+ 
+    
       try {
         const response = await fetch(url, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'x-access-token': apiKey
+            'x-access-token': `${apiKey}`
           },
         });
 
@@ -56,7 +60,6 @@ const TopDeals = () => {
         const data = await response.json();
 
         setDeals(data.data || []);
-        console.log(data.data);
       } catch (error) {
         setError(error.message);
       } finally {

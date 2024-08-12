@@ -25,15 +25,17 @@ const NewArrivals = () => {
 
   useEffect(() => {
     const fetchDeals = async () => {
-      const apiKey = 'd2db2862682ea1b7618cca9b3180e04e';
-      const url = 'https://tencowry-api-staging.onrender.com/api/v1/ecommerce/product/newarrival?skip=0&limit=20';
+      const apiRoot = process.env.REACT_APP_API_ROOT;
+      const apiKey = process.env.REACT_APP_API_KEY;
+      const url = `${apiRoot}/product/newarrival?skip=0&limit=20`;
+      // const url = 'https://tencowry-api-staging.onrender.com/api/v1/ecommerce/product/newarrival?skip=0&limit=20';
 
       try {
         const response = await fetch(url, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'x-access-token': apiKey
+            'x-access-token': `${apiKey}`
           },
         });
 
@@ -44,7 +46,6 @@ const NewArrivals = () => {
 
         // Assuming the deals data is in `data.data` if the API response is structured like: { status: true, message: "success", data: [...] }
         setDeals(data.data || []);
-        console.log(deals);
       } catch (error) {
         setError(error.message);
       } finally {
