@@ -115,7 +115,7 @@ const Checkout = () => {
         phone,
         products: order.products,
         total_amount,
-        callback_url: 'https://tencowry.vercel.app/paymentstatus?status',
+        callback_url: 'https://tencowry.vercel.app/paymentstatus?status=failed&id=2342342234234',
         // discount_amount: '0',
     });
 console.log(state);
