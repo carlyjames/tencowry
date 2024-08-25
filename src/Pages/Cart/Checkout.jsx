@@ -118,8 +118,6 @@ const Checkout = () => {
         callback_url: 'https://tencowry.vercel.app/paymentstatus?status=failed&id=2342342234234',
         // discount_amount: '0',
     });
-console.log(state);
-// An exception occurred: Invalid URL '_/coralpay/pos/paymentreference/generate': No scheme supplied. Perhaps you meant http://_/coralpay/pos/paymentreference/generate?
 
     const handleChange1 = (e) => {
         const { name, value } = e.target;

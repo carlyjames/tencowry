@@ -335,7 +335,16 @@ export const AuthProvider = ({ children }) => {
          }),
       });
   
-      const data = await response.json();
+      // Check if response content is valid JSON
+      const text = await response.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (parseError) {
+        console.error("Invalid JSON received:", text);
+        throw new Error("Invalid JSON response");
+      }
+
       console.log('Response:', data); 
   
       if (response.ok) {
