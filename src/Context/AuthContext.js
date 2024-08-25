@@ -299,9 +299,9 @@ export const AuthProvider = ({ children }) => {
       phone,
       email,
       products,
-      totalAmount,
+      total_amount,
       callback_url,
-      discount_amount,
+      // discount_amount,
      } = userData;
 
     
@@ -329,9 +329,9 @@ export const AuthProvider = ({ children }) => {
           phone,
           email,
           products,
-          totalAmount,
+          total_amount,
           callback_url,
-          discount_amount,
+          // discount_amount,
          }),
       });
   

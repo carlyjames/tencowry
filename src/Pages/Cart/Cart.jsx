@@ -34,7 +34,7 @@ const Cart = () => {
 
         // Update local storage and context state
         const updatedCart = cart.filter((cartItem) => cartItem.product_sku !== item.product_sku);
-        setCart(updatedCart);
+        setCart(updatedCart); 
         localStorage.setItem('cart', JSON.stringify(updatedCart));
         setDeletedItem(null);
     };

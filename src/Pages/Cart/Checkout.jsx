@@ -41,7 +41,7 @@ const Checkout = () => {
                 products: orderData.products || [],
                 shipping_cost: orderData.shipping_cost || 0,
                 products_amount: orderData.products_amount || 0,
-                totalAmount: Number(orderData.shipping_cost || 0) + Number(orderData.products_amount || 0),
+                total_amount: Number(orderData.shipping_cost || 0) + Number(orderData.products_amount || 0),
             }));
         }
 
@@ -98,8 +98,8 @@ const Checkout = () => {
     const products = Array.isArray(order?.products) ? order.products : [];
     const shippingCost = order.shipping_cost != null ? Number(order.shipping_cost) : 0;
     const productsAmount = order.products_amount != null ? Number(order.products_amount) : 0;
-    const totalAmount = shippingCost + productsAmount;
-    const formattedTotalAmount = formatCurrency(totalAmount);
+    const total_amount = shippingCost + productsAmount;
+    const formattedtotal_amount = formatCurrency(total_amount);
 
     const [state, setState] = useState({
         email,
@@ -114,11 +114,12 @@ const Checkout = () => {
         post_code: '',
         phone,
         products: order.products,
-        totalAmount,
-        callback_url: 'https://tencowry.vercel.app/confirmation',
-        discount_amount: '0',
+        total_amount,
+        callback_url: 'https://tencowry.vercel.app/paymentstatus?status',
+        // discount_amount: '0',
     });
 console.log(state);
+// An exception occurred: Invalid URL '_/coralpay/pos/paymentreference/generate': No scheme supplied. Perhaps you meant http://_/coralpay/pos/paymentreference/generate?
 
     const handleChange1 = (e) => {
         const { name, value } = e.target;
@@ -128,36 +129,15 @@ console.log(state);
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        console.log("Submitting form with state:", state);
         try {
             const response = await CreateOrder(state);
             console.log("CreateOrder response:", response);
     
-            // Reset the form state after a successful submission
-            setState({
-                email,
-                order_id: order.order_id,
-                first_name,
-                last_name,
-                address_1: '',
-                address_2: '',
-                city: '',
-                state: '',
-                country: 'Nigeria',
-                post_code: '',
-                phone,
-                products: order.products,
-                totalAmount,
-                callback_url: 'https://tencowry.vercel.app/confirmation',
-                discount_amount: '0',
-            });
-    
-            // Handle the response from the CreateOrder function
             if (response && response.status === false) {
-                console.error("Order creation failed:", response.message);
+                console.error("Order creation failed:", response.message || "No error message provided");
                 Swal.fire({
                     title: 'Order creation failed',
-                    text: response.message,
+                    text: response.message || 'An error occurred',
                     icon: 'error',
                     toast: true,
                     timer: 6000,
@@ -165,10 +145,10 @@ console.log(state);
                     timerProgressBar: true,
                     showConfirmButton: false
                 });
-            } else {
+            } else if (response) {
                 Swal.fire({
                     title: 'Order created successfully',
-                    text: response.message,
+                    text: response.message || 'Order was successfully created',
                     icon: 'success',
                     toast: true,
                     timer: 6000,
@@ -177,11 +157,12 @@ console.log(state);
                     showConfirmButton: false
                 });
             }
+            
         } catch (error) {
             console.error("Checkout failed:", error);
             Swal.fire({
                 title: 'Error during checkout',
-                text: error.message,
+                text: error.message || JSON.stringify(error) || 'An unexpected error occurred',
                 icon: 'error',
                 toast: true,
                 timer: 6000,
@@ -193,6 +174,7 @@ console.log(state);
             setLoading(false);
         }
     };
+    
     
 
     const handleCheckboxChange = (e) => {
@@ -225,7 +207,7 @@ console.log(state);
                 },
                 body: JSON.stringify({ shipping_info }),
             });
-            console.log(shipping_info);
+            // console.log(shipping_info);
             if (!response.ok) {
                 const errorResponse = await response.json();
                 console.error("Error response:", errorResponse);
@@ -396,7 +378,7 @@ console.log(state);
                             <hr />
                             <div className='flex items-center justify-between w-full lg:py-8'>
                                 <h1 className='font-semibold'>Total</h1>
-                                <p className='font-semibold text-green-500'>{formattedTotalAmount}</p>
+                                <p className='font-semibold text-green-500'>{formattedtotal_amount}</p>
                             </div>
                         </div>
                     </div>

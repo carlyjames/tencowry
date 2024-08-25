@@ -13,7 +13,7 @@ const Confirmation = () => {
     const fetchID = async () => {
       const apiRoot = process.env.REACT_APP_API_ROOT;
       const apiKey = process.env.REACT_APP_API_KEY;
-      const url = `${apiRoot}/payment/${id}/orderid`;
+      const url = `${apiRoot}/payment/${status}/orderid`;
 
       try {
         setLoading(true);
@@ -39,7 +39,7 @@ const Confirmation = () => {
     };
 
     fetchID();
-  }, [id]);
+  }, [status]);
   // USE STATUS TO QUERY WHAT TO DISPLAY TO USER
   const displayMessage = () => {
     if (loading) {
