@@ -13,7 +13,8 @@ const Confirmation = () => {
     const fetchID = async () => {
       const apiRoot = process.env.REACT_APP_API_ROOT;
       const apiKey = process.env.REACT_APP_API_KEY;
-      const url = `${apiRoot}/payment/${status}/orderid`;
+      // const url = `${apiRoot}/payment/${status}/orderid`;
+      const url = `https://tencowry.vercel.app/Confirmation?status=${status}&id=${id}`
 
       try {
         setLoading(true);
@@ -25,14 +26,14 @@ const Confirmation = () => {
           },
         });
         if (!response.ok) {
-          throw new Error('Failed to fetch id');
+          throw new Error('Failed to fetch status');
         }
         const data = await response.json();
         setLoading(false);
         setMyID(data.data);
         setPaymentStatus(data.status);
       } catch (error) {
-        console.error('Error fetching id:', error);
+        console.error('Error fetching status:', error);
         setLoading(false);
         setPaymentStatus('failed');
       }
@@ -40,6 +41,8 @@ const Confirmation = () => {
 
     fetchID();
   }, [status]);
+
+  
   // USE STATUS TO QUERY WHAT TO DISPLAY TO USER
   const displayMessage = () => {
     if (loading) {

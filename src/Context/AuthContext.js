@@ -288,7 +288,7 @@ export const AuthProvider = ({ children }) => {
 
   const CreateOrder = async (userData) => {
            setTimeout(() => {
-          window.location.href = `https://tencowry.vercel.app/Confirmation?status=failed&id=2342342234234`; 
+          window.location.href = `http://localhost:3000/Confirmation?status=failed&id=2342342234234`; 
         }, 3000);
   }
   
